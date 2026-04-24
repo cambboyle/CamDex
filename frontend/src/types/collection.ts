@@ -1,5 +1,3 @@
-import type { PokemonForm, PokemonSpeciesSummary } from './pokemon'
-
 export interface UserPokemon {
   id: string
   userId: string
@@ -15,14 +13,26 @@ export interface UserPokemon {
   nature: string | null
   caughtAt: string
   notes: string | null
-  form?: PokemonForm
-  species?: PokemonSpeciesSummary
 }
 
 export interface LivingDexEntry {
-  form: PokemonForm
-  species: PokemonSpeciesSummary
-  caught: UserPokemon | null
+  formId: string
+  formKey: string
+  displayName: string
+  isDefault: boolean
+  isMega: boolean
+  isGmax: boolean
+  isRegionalVariant: boolean
+  regionVariantName: string | null
+  type1: string | null
+  type2: string | null
+  spriteUrl: string | null
+  spriteShinyUrl: string | null
+  livingDexOrder: number
+  nationalDexNumber: number
+  speciesDisplayName: string
+  caughtId: string | null
+  caughtShinyId: string | null
 }
 
 export interface LivingDexStats {
@@ -37,25 +47,7 @@ export interface LivingDexResponse {
   stats: LivingDexStats
 }
 
-export interface Box {
-  id: string
-  userId: string
-  name: string
-  position: number
-  wallpaper: string
-  slotCount: number
-}
-
-export interface BoxSlot {
-  id: string
-  boxId: string
-  slotPosition: number
-  userPokemonId: string | null
-  userPokemon: UserPokemon | null
-}
-
-export interface CreateUserPokemonDto {
-  speciesId: string
+export interface AddPokemonDto {
   formId: string
   nickname?: string
   isShiny?: boolean
