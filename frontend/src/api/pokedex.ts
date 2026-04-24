@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { PaginatedSpecies, PokemonForm, PokemonSpeciesDetail } from '@/types/pokemon'
+import type { PaginatedSpecies, PokemonForm, PokemonSpecies } from '@/types/pokemon'
 
 export interface SpeciesListParams {
   search?: string
@@ -20,8 +20,8 @@ export function getSpeciesList(params: SpeciesListParams = {}): Promise<Paginate
   return api.get<PaginatedSpecies>(`/pokemon/species${qs ? `?${qs}` : ''}`)
 }
 
-export function getSpeciesDetail(id: string): Promise<PokemonSpeciesDetail> {
-  return api.get<PokemonSpeciesDetail>(`/pokemon/species/${id}`)
+export function getSpeciesDetail(id: string): Promise<PokemonSpecies> {
+  return api.get<PokemonSpecies>(`/pokemon/species/${id}`)
 }
 
 export function getFormDetail(id: string): Promise<PokemonForm> {
