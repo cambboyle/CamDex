@@ -1,4 +1,4 @@
-export interface PokemonSpeciesSummary {
+export interface PokemonSpecies {
   id: string
   nationalDexNumber: number
   name: string
@@ -8,17 +8,13 @@ export interface PokemonSpeciesSummary {
   isMythical: boolean
   isBaby: boolean
   color: string | null
-}
-
-export interface PokemonSpeciesDetail extends PokemonSpeciesSummary {
+  shape: string | null
   flavorText: string | null
-  evolvesFromId: string | null
   forms: PokemonForm[]
 }
 
 export interface PokemonForm {
   id: string
-  speciesId: string
   formKey: string
   displayName: string
   isDefault: boolean
@@ -27,14 +23,14 @@ export interface PokemonForm {
   isGmax: boolean
   isRegionalVariant: boolean
   regionVariantName: string | null
-  type1: string
+  type1: string | null
   type2: string | null
-  hp: number
-  attack: number
-  defense: number
-  specialAttack: number
-  specialDefense: number
-  speed: number
+  hp: number | null
+  atk: number | null
+  def: number | null
+  spa: number | null
+  spd: number | null
+  spe: number | null
   spriteUrl: string | null
   spriteShinyUrl: string | null
   spriteFrontUrl: string | null
@@ -42,7 +38,7 @@ export interface PokemonForm {
 }
 
 export interface PaginatedSpecies {
-  data: PokemonSpeciesSummary[]
+  data: PokemonSpecies[]
   total: number
   page: number
   limit: number
