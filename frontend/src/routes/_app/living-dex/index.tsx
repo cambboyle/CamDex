@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/living-dex/')({
+export const Route = createFileRoute('/_app/living-dex/')({
   component: LivingDexPage,
 })
 
