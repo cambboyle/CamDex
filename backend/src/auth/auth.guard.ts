@@ -8,7 +8,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { createPublicKey, type KeyObject } from 'crypto';
+import {
+  createPublicKey,
+  type KeyObject,
+  type JsonWebKey as CryptoJsonWebKey,
+} from 'crypto';
 
 export interface SupabaseJwtPayload {
   sub: string;
@@ -38,7 +42,7 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
       const res = await fetch(
         `${this.supabaseUrl}/auth/v1/.well-known/jwks.json`,
       );
-      const body = (await res.json()) as { keys: JsonWebKey[] };
+      const body = (await res.json()) as { keys: CryptoJsonWebKey[] };
       this.publicKeys = body.keys.map((jwk) =>
         createPublicKey({ key: jwk, format: 'jwk' }),
       );
