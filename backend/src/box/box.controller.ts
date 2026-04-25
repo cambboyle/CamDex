@@ -25,7 +25,10 @@ export class BoxController {
   }
 
   @Post()
-  createBox(@CurrentUser() user: SupabaseJwtPayload, @Body() dto: CreateBoxDto) {
+  createBox(
+    @CurrentUser() user: SupabaseJwtPayload,
+    @Body() dto: CreateBoxDto,
+  ) {
     return this.boxService.createBox(user.sub, dto);
   }
 

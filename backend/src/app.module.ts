@@ -10,6 +10,7 @@ import { PokemonModule } from './pokemon/pokemon.module';
 import { CollectionModule } from './collection/collection.module';
 import { BoxModule } from './box/box.module';
 import { TeamModule } from './team/team.module';
+import { DexModule } from './dex/dex.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TeamModule } from './team/team.module';
     CollectionModule,
     BoxModule,
     TeamModule,
+    DexModule,
   ],
   providers: [
     {

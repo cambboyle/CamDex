@@ -1,9 +1,41 @@
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 const NATURES = [
-  'hardy','lonely','brave','adamant','naughty','bold','docile','relaxed',
-  'impish','lax','timid','hasty','serious','jolly','naive','modest',
-  'mild','quiet','bashful','rash','calm','gentle','sassy','careful','quirky',
+  'hardy',
+  'lonely',
+  'brave',
+  'adamant',
+  'naughty',
+  'bold',
+  'docile',
+  'relaxed',
+  'impish',
+  'lax',
+  'timid',
+  'hasty',
+  'serious',
+  'jolly',
+  'naive',
+  'modest',
+  'mild',
+  'quiet',
+  'bashful',
+  'rash',
+  'calm',
+  'gentle',
+  'sassy',
+  'careful',
+  'quirky',
 ];
 
 export class AddPokemonDto {

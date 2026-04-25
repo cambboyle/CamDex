@@ -255,3 +255,67 @@ export type EvStat = typeof EV_STATS[number]
 export const STAT_LABELS: Record<EvStat, string> = {
   hp: 'HP', atk: 'Atk', def: 'Def', spa: 'Sp.A', spd: 'Sp.D', spe: 'Spe',
 }
+
+// ── Dex tracker config ────────────────────────────────────────────────────────
+
+export interface DexTypeConfig {
+  key: string
+  label: string
+  description: string
+  /** Whether to track shiny sprites */
+  isShiny: boolean
+  /** Whether to show only one entry per species (default form) */
+  speciesOnly: boolean
+}
+
+export const DEX_TYPES: DexTypeConfig[] = [
+  {
+    key: 'living-form',
+    label: 'Living Form Dex',
+    description: 'Every obtainable form — normal',
+    isShiny: false,
+    speciesOnly: false,
+  },
+  {
+    key: 'species',
+    label: 'Pokédex',
+    description: 'One entry per species — normal',
+    isShiny: false,
+    speciesOnly: true,
+  },
+  {
+    key: 'shiny-form',
+    label: 'Shiny Living Form Dex',
+    description: 'Every obtainable form — ✨ shiny',
+    isShiny: true,
+    speciesOnly: false,
+  },
+  {
+    key: 'shiny-species',
+    label: 'Shiny Dex',
+    description: 'One entry per species — ✨ shiny',
+    isShiny: true,
+    speciesOnly: true,
+  },
+]
+
+export const DEX_TYPE_MAP: Record<string, DexTypeConfig> = Object.fromEntries(
+  DEX_TYPES.map((d) => [d.key, d]),
+)
+
+/** "HOME" pseudo-game config used on the dex tracker list */
+export const HOME_GAME: GameConfig = {
+  key: 'home',
+  label: 'Pokémon HOME (National)',
+  shortLabel: 'HOME',
+  generation: null,
+  mechanic: null,
+  spSystem: false,
+  fixedIvs: false,
+  itemClause: false,
+  teamSize: 6,
+  speciesFilter: {},
+}
+
+/** All games including HOME for dex tracker dropdowns */
+export const DEX_GAMES: GameConfig[] = [HOME_GAME, ...GAMES]

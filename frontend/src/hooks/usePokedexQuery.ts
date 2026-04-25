@@ -5,6 +5,10 @@ export interface PokedexQueryParams {
   search?: string
   type?: string
   gen?: number
+  /** Show all Pokémon introduced up to and including this generation */
+  maxGen?: number
+  /** Restrict to the Pokémon Champions launch roster */
+  championsOnly?: boolean
   page?: number
 }
 
