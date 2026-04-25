@@ -1,4 +1,5 @@
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
 import type { BoxSlot as BoxSlotType } from '@/types/collection'
 import { BoxSlot } from './BoxSlot'
 import styles from './BoxGrid.module.css'
