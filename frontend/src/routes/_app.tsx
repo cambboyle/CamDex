@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { AppShell } from '@/components/layout/AppShell'
+import { RouteError } from '@/components/common/RouteError'
 import { supabase } from '@/lib/supabase'
 
 export const Route = createFileRoute('/_app')({
@@ -10,4 +11,5 @@ export const Route = createFileRoute('/_app')({
     }
   },
   component: AppShell,
+  errorComponent: ({ error }) => <RouteError error={error} />,
 })
