@@ -6,9 +6,24 @@ import { PokemonForm } from './entities/pokemon-form.entity';
 import { SpeciesQueryDto } from './dto/species-query.dto';
 
 const TYPES = [
-  'bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting',
-  'fire', 'flying', 'ghost', 'grass', 'ground', 'ice',
-  'normal', 'poison', 'psychic', 'rock', 'steel', 'water',
+  'bug',
+  'dark',
+  'dragon',
+  'electric',
+  'fairy',
+  'fighting',
+  'fire',
+  'flying',
+  'ghost',
+  'grass',
+  'ground',
+  'ice',
+  'normal',
+  'poison',
+  'psychic',
+  'rock',
+  'steel',
+  'water',
 ];
 
 @Injectable()
@@ -24,6 +39,8 @@ export class PokemonService {
     const page = Math.max(1, parseInt(query.page ?? '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10)));
     const gen = query.gen ? parseInt(query.gen, 10) : undefined;
+    const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
+    const championsOnly = query.championsOnly === 'true';
 
     const qb = this.speciesRepo
       .createQueryBuilder('s')
@@ -32,18 +49,29 @@ export class PokemonService {
       .addOrderBy('f.livingDexOrder', 'ASC');
 
     if (query.search) {
-      qb.andWhere('s.display_name ILIKE :search', { search: `%${query.search}%` });
+      qb.andWhere('s.display_name ILIKE :search', {
+        search: `%${query.search}%`,
+      });
     }
 
     if (query.type) {
-      qb.andWhere(
-        '(f.type1 = :type OR f.type2 = :type)',
-        { type: query.type },
-      );
+      qb.andWhere('(f.type1 = :type OR f.type2 = :type)', { type: query.type });
     }
 
     if (gen) {
+      // Exact generation (Pokédex filter)
       qb.andWhere('s.generation = :gen', { gen });
+    } else if (maxGen) {
+      // Up-to generation (team builder filter)
+      qb.andWhere('s.generation <= :maxGen', { maxGen });
+    }
+
+    if (championsOnly) {
+      // Champions launch pool: Paldean regional dex range + known additions
+      // National dex #001–375 and #388–392 cover the Paldean-adjacent roster
+      qb.andWhere(
+        '(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))',
+      );
     }
 
     const [data, total] = await qb
