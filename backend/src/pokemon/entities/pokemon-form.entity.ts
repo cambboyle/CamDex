@@ -41,7 +41,12 @@ export class PokemonForm {
   @Column({ type: 'boolean', default: false, name: 'is_regional_variant' })
   isRegionalVariant: boolean;
 
-  @Column({ type: 'varchar', length: 30, nullable: true, name: 'region_variant_name' })
+  @Column({
+    type: 'varchar',
+    length: 30,
+    nullable: true,
+    name: 'region_variant_name',
+  })
   regionVariantName: string | null;
 
   @Column({ type: 'varchar', length: 20, nullable: true })

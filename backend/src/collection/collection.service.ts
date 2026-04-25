@@ -57,7 +57,10 @@ export class CollectionService {
     });
   }
 
-  async addToCollection(userId: string, dto: AddPokemonDto): Promise<UserPokemon> {
+  async addToCollection(
+    userId: string,
+    dto: AddPokemonDto,
+  ): Promise<UserPokemon> {
     const form = await this.formRepo.findOne({
       where: { id: dto.formId },
       relations: ['species'],
@@ -94,7 +97,11 @@ export class CollectionService {
     return this.userPokemonRepo.save(pokemon);
   }
 
-  async updatePokemon(userId: string, id: string, dto: UpdatePokemonDto): Promise<UserPokemon> {
+  async updatePokemon(
+    userId: string,
+    id: string,
+    dto: UpdatePokemonDto,
+  ): Promise<UserPokemon> {
     const pokemon = await this.userPokemonRepo.findOneBy({ id });
     if (!pokemon) throw new NotFoundException(`Pokémon ${id} not found`);
     if (pokemon.userId !== userId) throw new ForbiddenException();
@@ -120,7 +127,9 @@ export class CollectionService {
     await this.userPokemonRepo.remove(pokemon);
   }
 
-  async getLivingDex(userId: string): Promise<{ entries: LivingDexEntry[]; stats: LivingDexStats }> {
+  async getLivingDex(
+    userId: string,
+  ): Promise<{ entries: LivingDexEntry[]; stats: LivingDexStats }> {
     // Single query: all forms LEFT JOIN user catches for this user
     const rows = await this.formRepo
       .createQueryBuilder('f')
@@ -164,7 +173,8 @@ export class CollectionService {
     const totalForms = rows.length;
     const caughtForms = rows.filter((r) => r.caughtId !== null).length;
     const shinyCaught = rows.filter((r) => r.caughtShinyId !== null).length;
-    const completionPercent = totalForms > 0 ? Math.round((caughtForms / totalForms) * 100) : 0;
+    const completionPercent =
+      totalForms > 0 ? Math.round((caughtForms / totalForms) * 100) : 0;
 
     return {
       entries: rows,

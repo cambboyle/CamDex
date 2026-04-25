@@ -45,7 +45,12 @@ export class UserPokemon {
   @Column({ type: 'varchar', length: 1, nullable: true })
   gender: string | null;
 
-  @Column({ type: 'varchar', length: 20, nullable: true, name: 'game_of_origin' })
+  @Column({
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    name: 'game_of_origin',
+  })
   gameOfOrigin: string | null;
 
   @Column({ type: 'varchar', length: 8, nullable: true, name: 'ot_name' })

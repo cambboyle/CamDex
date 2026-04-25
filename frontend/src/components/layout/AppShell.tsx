@@ -5,7 +5,7 @@ import styles from './AppShell.module.css'
 
 const NAV_ITEMS = [
   { to: '/' as const, label: 'Dashboard' },
-  { to: '/living-dex/' as const, label: 'Living Dex' },
+  { to: '/dex/' as const, label: 'My Dexes' },
   { to: '/pokedex/' as const, label: 'Pokédex' },
   { to: '/boxes/' as const, label: 'PC Boxes' },
   { to: '/teams/' as const, label: 'Teams' },

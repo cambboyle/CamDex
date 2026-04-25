@@ -30,6 +30,11 @@ export class BoxSlot {
   @JoinColumn({ name: 'user_pokemon_id' })
   pokemon: UserPokemon | null;
 
-  @Column({ type: 'uuid', nullable: true, unique: true, name: 'user_pokemon_id' })
+  @Column({
+    type: 'uuid',
+    nullable: true,
+    unique: true,
+    name: 'user_pokemon_id',
+  })
   userPokemonId: string | null;
 }
