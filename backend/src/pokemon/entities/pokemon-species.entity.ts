@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { PokemonForm } from './pokemon-form.entity';
 
 @Entity('pokemon_species')
@@ -40,6 +35,9 @@ export class PokemonSpecies {
 
   @Column({ type: 'text', nullable: true, name: 'flavor_text' })
   flavorText: string | null;
+
+  @Column({ type: 'jsonb', nullable: true, name: 'flavor_texts' })
+  flavorTexts: { text: string; version: string }[] | null;
 
   @Column({ type: 'timestamp', nullable: true, name: 'synced_at' })
   syncedAt: Date | null;
