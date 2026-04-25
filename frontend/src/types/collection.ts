@@ -28,6 +28,7 @@ export interface LivingDexEntry {
   type2: string | null
   spriteUrl: string | null
   spriteShinyUrl: string | null
+  spriteFrontUrl: string | null
   livingDexOrder: number
   nationalDexNumber: number
   speciesDisplayName: string
@@ -45,6 +46,42 @@ export interface LivingDexStats {
 export interface LivingDexResponse {
   entries: LivingDexEntry[]
   stats: LivingDexStats
+}
+
+export interface Box {
+  id: string
+  userId: string
+  name: string
+  position: number
+  wallpaper: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BoxSlot {
+  id: string
+  boxId: string
+  slotPosition: number
+  userPokemonId: string | null
+  pokemon: BoxPokemon | null
+}
+
+export interface BoxPokemon {
+  id: string
+  nickname: string | null
+  isShiny: boolean
+  form: {
+    id: string
+    displayName: string
+    spriteUrl: string | null
+    spriteFrontUrl: string | null
+    spriteShinyUrl: string | null
+  }
+  species: {
+    id: string
+    displayName: string
+    nationalDexNumber: number
+  }
 }
 
 export interface AddPokemonDto {
