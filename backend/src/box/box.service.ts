@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -75,7 +74,9 @@ export class BoxService {
       .getCount();
 
     if (filledSlots > 0) {
-      throw new BadRequestException('Cannot delete a box that contains Pokémon');
+      throw new BadRequestException(
+        'Cannot delete a box that contains Pokémon',
+      );
     }
 
     await this.boxRepo.remove(box);
@@ -90,7 +91,11 @@ export class BoxService {
     });
   }
 
-  async placePokemon(userId: string, boxId: string, dto: MovePokemonDto): Promise<BoxSlot> {
+  async placePokemon(
+    userId: string,
+    boxId: string,
+    dto: MovePokemonDto,
+  ): Promise<BoxSlot> {
     await this.getBox(userId, boxId); // verify ownership
 
     if (dto.slotPosition < 0 || dto.slotPosition > 29) {
@@ -154,7 +159,11 @@ export class BoxService {
     return this.slotRepo.save(slot);
   }
 
-  async clearSlot(userId: string, boxId: string, slotPosition: number): Promise<void> {
+  async clearSlot(
+    userId: string,
+    boxId: string,
+    slotPosition: number,
+  ): Promise<void> {
     await this.getBox(userId, boxId); // verify ownership
 
     const slot = await this.slotRepo.findOne({
