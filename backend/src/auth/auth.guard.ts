@@ -35,12 +35,21 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
 
   private async loadJwks() {
     try {
-      const res = await fetch(`${this.supabaseUrl}/auth/v1/.well-known/jwks.json`);
-      const { keys } = (await res.json()) as { keys: object[] };
-      this.publicKeys = keys.map((jwk) => createPublicKey({ key: jwk as any, format: 'jwk' }));
-      console.log(`[JwtAuthGuard] Loaded ${this.publicKeys.length} public key(s) from JWKS`);
+      const res = await fetch(
+        `${this.supabaseUrl}/auth/v1/.well-known/jwks.json`,
+      );
+      const body = (await res.json()) as { keys: JsonWebKey[] };
+      this.publicKeys = body.keys.map((jwk) =>
+        createPublicKey({ key: jwk, format: 'jwk' }),
+      );
+      console.log(
+        `[JwtAuthGuard] Loaded ${this.publicKeys.length} public key(s) from JWKS`,
+      );
     } catch (err) {
-      console.warn('[JwtAuthGuard] Failed to load JWKS, falling back to symmetric secret:', err);
+      console.warn(
+        '[JwtAuthGuard] Failed to load JWKS, falling back to symmetric secret:',
+        err,
+      );
     }
   }
 
@@ -52,7 +61,9 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
     // Try ES256 with each JWKS public key first
     for (const key of this.publicKeys) {
       try {
-        const payload = jwt.verify(token, key, { algorithms: ['ES256'] }) as SupabaseJwtPayload;
+        const payload = jwt.verify(token, key, {
+          algorithms: ['ES256'],
+        }) as SupabaseJwtPayload;
         (request as Request & { user: SupabaseJwtPayload }).user = payload;
         return true;
       } catch {
