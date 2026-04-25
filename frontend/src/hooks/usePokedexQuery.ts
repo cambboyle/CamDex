@@ -11,7 +11,7 @@ export interface PokedexQueryParams {
 export function usePokedexQuery(params: PokedexQueryParams) {
   return useQuery({
     queryKey: ['pokedex', params],
-    queryFn: () => getSpeciesList({ ...params, limit: 20 }),
+    queryFn: () => getSpeciesList({ ...params, limit: 60 }),
   })
 }
 
