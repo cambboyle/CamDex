@@ -10,6 +10,7 @@ export interface PokemonSpecies {
   color: string | null
   shape: string | null
   flavorText: string | null
+  flavorTexts: { text: string; version: string }[] | null
   forms: PokemonForm[]
 }
 
