@@ -24,6 +24,7 @@ export interface LivingDexEntry {
   type2: string | null;
   spriteUrl: string | null;
   spriteShinyUrl: string | null;
+  spriteFrontUrl: string | null;
   livingDexOrder: number;
   nationalDexNumber: number;
   speciesDisplayName: string;
@@ -150,6 +151,7 @@ export class CollectionService {
         'f.type2 AS "type2"',
         'f.sprite_url AS "spriteUrl"',
         'f.sprite_shiny_url AS "spriteShinyUrl"',
+        'f.sprite_front_url AS "spriteFrontUrl"',
         'f.living_dex_order AS "livingDexOrder"',
         's.national_dex_number AS "nationalDexNumber"',
         's.display_name AS "speciesDisplayName"',

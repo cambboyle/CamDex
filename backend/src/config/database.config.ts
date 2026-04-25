@@ -12,6 +12,7 @@ export function getDatabaseConfig(config: ConfigService): TypeOrmModuleOptions {
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
     synchronize: false,
+    migrationsRun: true,
     logging: config.get('NODE_ENV') === 'development',
   };
 }

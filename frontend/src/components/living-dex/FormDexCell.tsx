@@ -17,9 +17,9 @@ export function FormDexCell({ entry, onClick }: FormDexCellProps) {
       title={`${entry.displayName}${isCaught ? ' ✓' : ''}${isShinyCaught ? ' ✨' : ''}`}
       aria-label={`${entry.displayName}${isCaught ? ', caught' : ', not caught'}${isShinyCaught ? ', shiny caught' : ''}`}
     >
-      {entry.spriteUrl ? (
+      {(entry.spriteFrontUrl ?? entry.spriteUrl) ? (
         <img
-          src={entry.spriteUrl}
+          src={(entry.spriteFrontUrl ?? entry.spriteUrl)!}
           alt={entry.displayName}
           className={styles.sprite}
           loading="lazy"
