@@ -24,25 +24,43 @@ const EXCLUDED_FORMS = new Set([
 
 function getGenNumber(genName: string): number {
   const map: Record<string, number> = {
-    'generation-i': 1, 'generation-ii': 2, 'generation-iii': 3,
-    'generation-iv': 4, 'generation-v': 5, 'generation-vi': 6,
-    'generation-vii': 7, 'generation-viii': 8, 'generation-ix': 9,
+    'generation-i': 1,
+    'generation-ii': 2,
+    'generation-iii': 3,
+    'generation-iv': 4,
+    'generation-v': 5,
+    'generation-vi': 6,
+    'generation-vii': 7,
+    'generation-viii': 8,
+    'generation-ix': 9,
   };
   return map[genName] ?? 1;
 }
 
 function getFormPriority(name: string, isDefault: boolean): number {
   if (isDefault) return 0;
-  if (name.includes('-alola') || name.includes('-galar') || name.includes('-hisui') || name.includes('-paldea')) return 100;
+  if (
+    name.includes('-alola') ||
+    name.includes('-galar') ||
+    name.includes('-hisui') ||
+    name.includes('-paldea')
+  )
+    return 100;
   if (name.includes('-mega')) return 200;
   if (name.includes('-gmax')) return 300;
   return 400;
 }
 
-function getFormKey(speciesName: string, pokemonName: string, isDefault: boolean): string {
+function getFormKey(
+  speciesName: string,
+  pokemonName: string,
+  isDefault: boolean,
+): string {
   if (isDefault) return '';
   const prefix = speciesName + '-';
-  return pokemonName.startsWith(prefix) ? pokemonName.slice(prefix.length) : pokemonName;
+  return pokemonName.startsWith(prefix)
+    ? pokemonName.slice(prefix.length)
+    : pokemonName;
 }
 
 function sleep(ms: number) {
@@ -86,7 +104,9 @@ export class PokemonSyncService {
       }
 
       if (i % 100 === 0) {
-        this.logger.log(`Progress: ${i}/${speciesNames.length} species processed`);
+        this.logger.log(
+          `Progress: ${i}/${speciesNames.length} species processed`,
+        );
       }
 
       if (i + BATCH_SIZE < speciesNames.length) {
@@ -94,7 +114,9 @@ export class PokemonSyncService {
       }
     }
 
-    this.logger.log(`Sync complete: ${speciesCount} species, ${formCount} forms`);
+    this.logger.log(
+      `Sync complete: ${speciesCount} species, ${formCount} forms`,
+    );
     return { speciesCount, formCount };
   }
 
@@ -102,10 +124,26 @@ export class PokemonSyncService {
     const speciesData = await this.pokeApi.getSpecies(name);
     const dexNumber = speciesData.id;
     const genNumber = getGenNumber(speciesData.generation.name);
+    const englishEntries = speciesData.flavor_text_entries.filter(
+      (e) => e.language.name === 'en',
+    );
     const flavorText =
-      speciesData.flavor_text_entries.find((e) => e.language.name === 'en')
-        ?.flavor_text.replace(/\f/g, ' ')
-        .replace(/\n/g, ' ') ?? null;
+      englishEntries[0]?.flavor_text.replace(/\f/g, ' ').replace(/\n/g, ' ') ??
+      null;
+    // De-duplicate per version (keep last entry per version name)
+    const flavorTextsMap = new Map<string, string>();
+    for (const e of englishEntries) {
+      flavorTextsMap.set(
+        e.version.name,
+        e.flavor_text.replace(/\f/g, ' ').replace(/\n/g, ' '),
+      );
+    }
+    const flavorTexts = Array.from(flavorTextsMap.entries()).map(
+      ([version, text]) => ({
+        version,
+        text,
+      }),
+    );
 
     // Upsert species
     await this.speciesRepo
@@ -123,16 +161,30 @@ export class PokemonSyncService {
         color: speciesData.color?.name ?? null,
         shape: speciesData.shape?.name ?? null,
         flavorText,
+        flavorTexts,
         syncedAt: new Date(),
       })
       .orUpdate(
-        ['name', 'display_name', 'generation', 'is_legendary', 'is_mythical',
-          'is_baby', 'color', 'shape', 'flavor_text', 'synced_at'],
+        [
+          'name',
+          'display_name',
+          'generation',
+          'is_legendary',
+          'is_mythical',
+          'is_baby',
+          'color',
+          'shape',
+          'flavor_text',
+          'flavor_texts',
+          'synced_at',
+        ],
         ['national_dex_number'],
       )
       .execute();
 
-    const species = await this.speciesRepo.findOneByOrFail({ nationalDexNumber: dexNumber });
+    const species = await this.speciesRepo.findOneByOrFail({
+      nationalDexNumber: dexNumber,
+    });
 
     let formCount = 0;
     for (const variety of speciesData.varieties) {
@@ -173,24 +225,37 @@ export class PokemonSyncService {
         else if (pokemonName.includes('-paldea')) regionVariantName = 'paldea';
 
         const sprites = pokemonData.sprites;
-        const spriteUrl = sprites.other?.['official-artwork']?.front_default ?? null;
-        const spriteShinyUrl = sprites.other?.['official-artwork']?.front_shiny ?? null;
+        const spriteUrl =
+          sprites.other?.['official-artwork']?.front_default ?? null;
+        const spriteShinyUrl =
+          sprites.other?.['official-artwork']?.front_shiny ?? null;
         const spriteFrontUrl = sprites.front_default ?? null;
 
         const statMap: Record<string, number | null> = {
-          hp: null, atk: null, def: null, spa: null, spd: null, spe: null,
+          hp: null,
+          atk: null,
+          def: null,
+          spa: null,
+          spd: null,
+          spe: null,
         };
         const statKeyMap: Record<string, string> = {
-          hp: 'hp', attack: 'atk', defense: 'def',
-          'special-attack': 'spa', 'special-defense': 'spd', speed: 'spe',
+          hp: 'hp',
+          attack: 'atk',
+          defense: 'def',
+          'special-attack': 'spa',
+          'special-defense': 'spd',
+          speed: 'spe',
         };
         for (const stat of pokemonData.stats) {
           const key = statKeyMap[stat.stat.name];
           if (key) statMap[key] = stat.base_stat;
         }
 
-        const type1 = pokemonData.types.find((t) => t.slot === 1)?.type.name ?? null;
-        const type2 = pokemonData.types.find((t) => t.slot === 2)?.type.name ?? null;
+        const type1 =
+          pokemonData.types.find((t) => t.slot === 1)?.type.name ?? null;
+        const type2 =
+          pokemonData.types.find((t) => t.slot === 2)?.type.name ?? null;
 
         const displayName = isDefault
           ? this.toDisplayName(speciesData.name)
@@ -224,10 +289,27 @@ export class PokemonSyncService {
             livingDexOrder,
           })
           .orUpdate(
-            ['display_name', 'is_default', 'is_battle_only', 'is_mega', 'is_gmax',
-              'is_regional_variant', 'region_variant_name', 'type1', 'type2',
-              'hp', 'atk', 'def', 'spa', 'spd', 'spe',
-              'sprite_url', 'sprite_shiny_url', 'sprite_front_url', 'living_dex_order'],
+            [
+              'display_name',
+              'is_default',
+              'is_battle_only',
+              'is_mega',
+              'is_gmax',
+              'is_regional_variant',
+              'region_variant_name',
+              'type1',
+              'type2',
+              'hp',
+              'atk',
+              'def',
+              'spa',
+              'spd',
+              'spe',
+              'sprite_url',
+              'sprite_shiny_url',
+              'sprite_front_url',
+              'living_dex_order',
+            ],
             ['species_id', 'form_key'],
           )
           .execute();

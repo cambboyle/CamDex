@@ -1,0 +1,38 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.multiplier {
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 7px;
+  min-width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.x4 { background: #dc2626; color: #fff; }
+.x2 { background: #f97316; color: #fff; }
+.half { background: #3b82f6; color: #fff; }
+.quarter { background: #1d4ed8; color: #fff; }
+.immune { background: #1f2937; color: #fff; }
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.none {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}

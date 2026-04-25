@@ -11,7 +11,7 @@ export function SpeciesGrid({ species, loading }: SpeciesGridProps) {
   if (loading) {
     return (
       <div className={styles.grid}>
-        {Array.from({ length: 20 }).map((_, i) => (
+        {Array.from({ length: 60 }).map((_, i) => (
           <div key={i} className={styles.skeleton} />
         ))}
       </div>

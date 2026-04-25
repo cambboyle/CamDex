@@ -13,7 +13,9 @@ export class PokeApiClient {
     return res.json() as Promise<T>;
   }
 
-  getSpeciesList(limit = 2000): Promise<{ results: { name: string; url: string }[] }> {
+  getSpeciesList(
+    limit = 2000,
+  ): Promise<{ results: { name: string; url: string }[] }> {
     return this.fetch(`/pokemon-species?limit=${limit}`);
   }
 
@@ -40,7 +42,11 @@ export interface PokeApiSpecies {
   is_baby: boolean;
   color: { name: string };
   shape: { name: string } | null;
-  flavor_text_entries: { flavor_text: string; language: { name: string } }[];
+  flavor_text_entries: {
+    flavor_text: string;
+    language: { name: string };
+    version: { name: string };
+  }[];
   varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
 }
 
