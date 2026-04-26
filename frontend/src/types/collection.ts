@@ -1,5 +1,3 @@
-import type { PokemonForm, PokemonSpeciesSummary } from './pokemon'
-
 export interface UserPokemon {
   id: string
   userId: string
@@ -15,14 +13,27 @@ export interface UserPokemon {
   nature: string | null
   caughtAt: string
   notes: string | null
-  form?: PokemonForm
-  species?: PokemonSpeciesSummary
 }
 
 export interface LivingDexEntry {
-  form: PokemonForm
-  species: PokemonSpeciesSummary
-  caught: UserPokemon | null
+  formId: string
+  formKey: string
+  displayName: string
+  isDefault: boolean
+  isMega: boolean
+  isGmax: boolean
+  isRegionalVariant: boolean
+  regionVariantName: string | null
+  type1: string | null
+  type2: string | null
+  spriteUrl: string | null
+  spriteShinyUrl: string | null
+  spriteFrontUrl: string | null
+  livingDexOrder: number
+  nationalDexNumber: number
+  speciesDisplayName: string
+  caughtId: string | null
+  caughtShinyId: string | null
 }
 
 export interface LivingDexStats {
@@ -42,8 +53,9 @@ export interface Box {
   userId: string
   name: string
   position: number
-  wallpaper: string
-  slotCount: number
+  wallpaper: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface BoxSlot {
@@ -51,11 +63,28 @@ export interface BoxSlot {
   boxId: string
   slotPosition: number
   userPokemonId: string | null
-  userPokemon: UserPokemon | null
+  pokemon: BoxPokemon | null
 }
 
-export interface CreateUserPokemonDto {
-  speciesId: string
+export interface BoxPokemon {
+  id: string
+  nickname: string | null
+  isShiny: boolean
+  form: {
+    id: string
+    displayName: string
+    spriteUrl: string | null
+    spriteFrontUrl: string | null
+    spriteShinyUrl: string | null
+  }
+  species: {
+    id: string
+    displayName: string
+    nationalDexNumber: number
+  }
+}
+
+export interface AddPokemonDto {
   formId: string
   nickname?: string
   isShiny?: boolean

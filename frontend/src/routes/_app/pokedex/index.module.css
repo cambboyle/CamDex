@@ -1,0 +1,79 @@
+.page {
+  padding: 24px;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.count {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search:focus {
+  border-color: #4f46e5;
+}
+
+.select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.select:focus {
+  border-color: #4f46e5;
+}
+
+/* Invisible 1px sentinel at the bottom of the list */
+.sentinel {
+  height: 1px;
+}
+
+.loadingMore {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.allLoaded {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}

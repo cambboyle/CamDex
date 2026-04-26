@@ -1,0 +1,178 @@
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Mobile top bar (hidden on desktop) ── */
+.topBar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: #1a1a2e;
+  padding: 0 16px;
+  z-index: 200;
+}
+
+.topBarLogo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 4px;
+}
+
+.hamburger:hover { background: rgba(255,255,255,0.08); }
+
+.hamburgerLine {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #e0e0e0;
+  border-radius: 2px;
+}
+
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 150;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  z-index: 160;
+  transition: transform 0.24s ease;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0 1.25rem 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.navList li {
+  display: block;
+}
+
+.navLink {
+  display: block;
+  padding: 0.65rem 1.25rem;
+  color: #b0b0c8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.navLinkActive {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+}
+
+.userSection {
+  padding: 1rem 1.25rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signOutButton {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #b0b0c8;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.signOutButton:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+/* ── Main content ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  background: #f5f5f7;
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .topBar {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    padding-top: 1rem;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .main {
+    padding: 72px 16px 16px; /* space for top bar */
+  }
+}
