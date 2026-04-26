@@ -22,6 +22,15 @@ export interface GameConfig {
   teamSize: 6
   /** Query params for the species endpoint */
   speciesFilter: { maxGen?: number; championsOnly?: boolean }
+  /**
+   * Which regional variant names are obtainable in this game's team builder.
+   * null  = no restriction (all regional forms allowed)
+   * []    = no regional variants — only default forms
+   * [...] = only the listed region names (e.g. ['alola', 'galar'])
+   *
+   * Possible values: 'alola' | 'galar' | 'hisui' | 'paldea'
+   */
+  allowedRegions: string[] | null
 }
 
 // ── Game definitions ────────────────────────────────────────────────────────
@@ -38,6 +47,7 @@ export const GAMES: GameConfig[] = [
     itemClause: true,
     teamSize: 6,
     speciesFilter: { championsOnly: true },
+    allowedRegions: null, // all regional forms allowed
   },
   {
     key: 'scarlet-violet',
@@ -50,6 +60,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 9 },
+    allowedRegions: null, // S/V + HOME: all prior regional forms accessible
   },
   {
     key: 'sword-shield',
@@ -62,6 +73,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 8 },
+    allowedRegions: ['alola', 'galar'], // Galarian native; Alolan obtainable via transfer
   },
   {
     key: 'brilliant-diamond-shining-pearl',
@@ -73,7 +85,8 @@ export const GAMES: GameConfig[] = [
     fixedIvs: false,
     itemClause: false,
     teamSize: 6,
-    speciesFilter: { maxGen: 4 }, // BDSP only has Gen 1–4 Pokémon
+    speciesFilter: { maxGen: 4 },
+    allowedRegions: [], // Gen 1–4 only, no regional variants exist yet
   },
   {
     key: 'legends-arceus',
@@ -86,6 +99,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 8 },
+    allowedRegions: ['hisui'], // only Hisuian forms are native to Hisui
   },
   {
     key: 'ultra-sun-ultra-moon',
@@ -98,6 +112,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 7 },
+    allowedRegions: ['alola'], // Alolan forms introduced this gen
   },
   {
     key: 'sun-moon',
@@ -110,6 +125,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 7 },
+    allowedRegions: ['alola'],
   },
   {
     key: 'omega-ruby-alpha-sapphire',
@@ -122,6 +138,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 6 },
+    allowedRegions: [], // no regional variants before Gen 7
   },
   {
     key: 'x-y',
@@ -134,6 +151,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 6 },
+    allowedRegions: [],
   },
   {
     key: 'black-2-white-2',
@@ -146,6 +164,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 5 },
+    allowedRegions: [],
   },
   {
     key: 'black-white',
@@ -158,6 +177,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 5 },
+    allowedRegions: [],
   },
   {
     key: 'heartgold-soulsilver',
@@ -170,6 +190,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 4 },
+    allowedRegions: [],
   },
   {
     key: 'diamond-pearl-platinum',
@@ -182,6 +203,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 4 },
+    allowedRegions: [],
   },
   {
     key: 'firered-leafgreen',
@@ -193,7 +215,8 @@ export const GAMES: GameConfig[] = [
     fixedIvs: false,
     itemClause: false,
     teamSize: 6,
-    speciesFilter: { maxGen: 1 }, // FRLG = Gen 1 Pokémon
+    speciesFilter: { maxGen: 1 },
+    allowedRegions: [],
   },
   {
     key: 'ruby-sapphire-emerald',
@@ -206,6 +229,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 3 },
+    allowedRegions: [],
   },
   {
     key: 'gold-silver-crystal',
@@ -218,6 +242,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 2 },
+    allowedRegions: [],
   },
   {
     key: 'red-blue-yellow',
@@ -230,6 +255,7 @@ export const GAMES: GameConfig[] = [
     itemClause: false,
     teamSize: 6,
     speciesFilter: { maxGen: 1 },
+    allowedRegions: [],
   },
 ]
 
@@ -315,6 +341,7 @@ export const HOME_GAME: GameConfig = {
   itemClause: false,
   teamSize: 6,
   speciesFilter: {},
+  allowedRegions: null,
 }
 
 /** All games including HOME for dex tracker dropdowns */

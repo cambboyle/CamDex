@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useCallback } from 'react'
 import { useTeamQuery, useUpsertTeamMember, useClearTeamMember, useUpdateTeam } from '@/hooks/useTeamsQuery'
-import { usePokedexInfiniteQuery } from '@/hooks/usePokedexQuery'
+import { usePokedexInfiniteQuery, PICKER_LIMIT } from '@/hooks/usePokedexQuery'
 import { getGameConfig, GAMES, NATURES, EV_STATS, STAT_LABELS } from '@/lib/gameConfig'
 import { PokemonSprite } from '@/components/common/PokemonSprite'
 import { TypeBadge } from '@/components/common/TypeBadge'
@@ -28,10 +28,11 @@ function PokemonPicker({
   const config = getGameConfig(game)
   const [search, setSearch] = useState('')
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    usePokedexInfiniteQuery({ search, ...config.speciesFilter })
+    usePokedexInfiniteQuery({ search, ...config.speciesFilter }, PICKER_LIMIT)
 
   const allSpecies = data?.pages.flatMap((p) => p.data) ?? []
   const totalCount = data?.pages[data.pages.length - 1]?.total ?? null
+  const allowedRegions = config.allowedRegions
 
   return (
     <div className={styles.pickerBackdrop} onClick={onClose}>
@@ -59,28 +60,35 @@ function PokemonPicker({
             ? Array.from({ length: 20 }).map((_, i) => (
                 <div key={i} className={styles.pickerSkeleton} />
               ))
-            : allSpecies.map((s) =>
-                // Exclude battle-only forms — they cannot be used on a team
-                s.forms
+            : allSpecies.flatMap((s) => {
+                // Filter 1: drop battle-only forms (can't be used on a team)
+                // Filter 2: drop regional variants not obtainable in this game
+                const validForms = s.forms
                   .filter((form) => !form.isBattleOnly)
-                  .map((form, fi) => {
-                    const url = form.spriteFrontUrl ?? form.spriteUrl
-                    return (
-                      <button
-                        key={form.id}
-                        className={styles.pickerItem}
-                        onClick={() => { onSelect(s, fi); onClose() }}
-                      >
-                        <PokemonSprite url={url} alt={form.displayName} size={52} />
-                        <span className={styles.pickerName}>{form.displayName}</span>
-                        <div className={styles.pickerTypes}>
-                          {form.type1 && <TypeBadge type={form.type1} size="sm" />}
-                          {form.type2 && <TypeBadge type={form.type2} size="sm" />}
-                        </div>
-                      </button>
-                    )
-                  }),
-              )}
+                  .filter((form) => {
+                    if (allowedRegions === null) return true // all regions allowed
+                    if (!form.isRegionalVariant || !form.regionVariantName) return true // default forms always OK
+                    return allowedRegions.includes(form.regionVariantName)
+                  })
+                // Skip species with no valid forms after filtering
+                return validForms.map((form, fi) => {
+                  const url = form.spriteFrontUrl ?? form.spriteUrl
+                  return (
+                    <button
+                      key={form.id}
+                      className={styles.pickerItem}
+                      onClick={() => { onSelect(s, fi); onClose() }}
+                    >
+                      <PokemonSprite url={url} alt={form.displayName} size={52} />
+                      <span className={styles.pickerName}>{form.displayName}</span>
+                      <div className={styles.pickerTypes}>
+                        {form.type1 && <TypeBadge type={form.type1} size="sm" />}
+                        {form.type2 && <TypeBadge type={form.type2} size="sm" />}
+                      </div>
+                    </button>
+                  )
+                })
+              })}
         </div>
 
         {hasNextPage && (

@@ -37,7 +37,7 @@ export class PokemonService {
 
   async findAllSpecies(query: SpeciesQueryDto) {
     const page = Math.max(1, parseInt(query.page ?? '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10)));
+    const limit = Math.min(500, Math.max(1, parseInt(query.limit ?? '20', 10)));
     const gen = query.gen ? parseInt(query.gen, 10) : undefined;
     const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
     const championsOnly = query.championsOnly === 'true';
