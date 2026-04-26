@@ -30,13 +30,20 @@ function PokemonPicker({
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
     usePokedexInfiniteQuery({ search, ...config.speciesFilter })
 
-  const species = data?.pages.flatMap((p) => p.data) ?? []
+  const allSpecies = data?.pages.flatMap((p) => p.data) ?? []
+  const totalCount = data?.pages[data.pages.length - 1]?.total ?? null
 
   return (
     <div className={styles.pickerBackdrop} onClick={onClose}>
       <div className={styles.picker} onClick={(e) => e.stopPropagation()}>
         <div className={styles.pickerHeader}>
-          <h3 className={styles.pickerTitle}>Choose Pokémon</h3>
+          <div className={styles.pickerTitleRow}>
+            <h3 className={styles.pickerTitle}>Choose Pokémon</h3>
+            <span className={styles.pickerGame}>
+              {config.shortLabel}
+              {totalCount !== null && ` · ${totalCount.toLocaleString()} species`}
+            </span>
+          </div>
           <input
             className={styles.pickerSearch}
             placeholder="Search…"
@@ -52,24 +59,27 @@ function PokemonPicker({
             ? Array.from({ length: 20 }).map((_, i) => (
                 <div key={i} className={styles.pickerSkeleton} />
               ))
-            : species.map((s) =>
-                s.forms.map((form, fi) => {
-                  const url = form.spriteFrontUrl ?? form.spriteUrl
-                  return (
-                    <button
-                      key={form.id}
-                      className={styles.pickerItem}
-                      onClick={() => { onSelect(s, fi); onClose() }}
-                    >
-                      <PokemonSprite url={url} alt={form.displayName} size={52} />
-                      <span className={styles.pickerName}>{form.displayName}</span>
-                      <div className={styles.pickerTypes}>
-                        {form.type1 && <TypeBadge type={form.type1} size="sm" />}
-                        {form.type2 && <TypeBadge type={form.type2} size="sm" />}
-                      </div>
-                    </button>
-                  )
-                }),
+            : allSpecies.map((s) =>
+                // Exclude battle-only forms — they cannot be used on a team
+                s.forms
+                  .filter((form) => !form.isBattleOnly)
+                  .map((form, fi) => {
+                    const url = form.spriteFrontUrl ?? form.spriteUrl
+                    return (
+                      <button
+                        key={form.id}
+                        className={styles.pickerItem}
+                        onClick={() => { onSelect(s, fi); onClose() }}
+                      >
+                        <PokemonSprite url={url} alt={form.displayName} size={52} />
+                        <span className={styles.pickerName}>{form.displayName}</span>
+                        <div className={styles.pickerTypes}>
+                          {form.type1 && <TypeBadge type={form.type1} size="sm" />}
+                          {form.type2 && <TypeBadge type={form.type2} size="sm" />}
+                        </div>
+                      </button>
+                    )
+                  }),
               )}
         </div>
 
