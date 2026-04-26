@@ -2,11 +2,17 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
+import {
+  createPublicKey,
+  type KeyObject,
+  type JsonWebKey as CryptoJsonWebKey,
+} from 'crypto';
 
 export interface SupabaseJwtPayload {
   sub: string;
@@ -17,11 +23,38 @@ export interface SupabaseJwtPayload {
 }
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class JwtAuthGuard implements CanActivate, OnModuleInit {
+  private readonly supabaseUrl: string;
   private readonly jwtSecret: string;
+  private publicKeys: KeyObject[] = [];
 
   constructor(private readonly config: ConfigService) {
-    this.jwtSecret = config.getOrThrow<string>('SUPABASE_JWT_SECRET');
+    this.supabaseUrl = config.getOrThrow<string>('SUPABASE_URL');
+    this.jwtSecret = config.get<string>('SUPABASE_JWT_SECRET') ?? '';
+  }
+
+  async onModuleInit() {
+    await this.loadJwks();
+  }
+
+  private async loadJwks() {
+    try {
+      const res = await fetch(
+        `${this.supabaseUrl}/auth/v1/.well-known/jwks.json`,
+      );
+      const body = (await res.json()) as { keys: CryptoJsonWebKey[] };
+      this.publicKeys = body.keys.map((jwk) =>
+        createPublicKey({ key: jwk, format: 'jwk' }),
+      );
+      console.log(
+        `[JwtAuthGuard] Loaded ${this.publicKeys.length} public key(s) from JWKS`,
+      );
+    } catch (err) {
+      console.warn(
+        '[JwtAuthGuard] Failed to load JWKS, falling back to symmetric secret:',
+        err,
+      );
+    }
   }
 
   canActivate(context: ExecutionContext): boolean {
@@ -29,13 +62,33 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractToken(request);
     if (!token) throw new UnauthorizedException('Missing authorization token');
 
-    try {
-      const payload = jwt.verify(token, this.jwtSecret) as SupabaseJwtPayload;
-      (request as Request & { user: SupabaseJwtPayload }).user = payload;
-      return true;
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+    // Try ES256 with each JWKS public key first
+    for (const key of this.publicKeys) {
+      try {
+        const payload = jwt.verify(token, key, {
+          algorithms: ['ES256'],
+        }) as SupabaseJwtPayload;
+        (request as Request & { user: SupabaseJwtPayload }).user = payload;
+        return true;
+      } catch {
+        // Try next key
+      }
     }
+
+    // Fall back to HS256 symmetric secret
+    if (this.jwtSecret) {
+      try {
+        const payload = jwt.verify(token, this.jwtSecret, {
+          algorithms: ['HS256'],
+        }) as SupabaseJwtPayload;
+        (request as Request & { user: SupabaseJwtPayload }).user = payload;
+        return true;
+      } catch {
+        // Fall through to throw
+      }
+    }
+
+    throw new UnauthorizedException('Invalid or expired token');
   }
 
   private extractToken(request: Request): string | undefined {

@@ -1,10 +1,12 @@
 import { api } from './client'
-import type { PaginatedSpecies, PokemonForm, PokemonSpeciesDetail } from '@/types/pokemon'
+import type { PaginatedSpecies, PokemonForm, PokemonSpecies } from '@/types/pokemon'
 
 export interface SpeciesListParams {
   search?: string
   type?: string
   gen?: number
+  maxGen?: number
+  championsOnly?: boolean
   page?: number
   limit?: number
 }
@@ -14,14 +16,16 @@ export function getSpeciesList(params: SpeciesListParams = {}): Promise<Paginate
   if (params.search) query.set('search', params.search)
   if (params.type) query.set('type', params.type)
   if (params.gen) query.set('gen', String(params.gen))
+  if (params.maxGen) query.set('maxGen', String(params.maxGen))
+  if (params.championsOnly) query.set('championsOnly', 'true')
   if (params.page) query.set('page', String(params.page))
   if (params.limit) query.set('limit', String(params.limit))
   const qs = query.toString()
   return api.get<PaginatedSpecies>(`/pokemon/species${qs ? `?${qs}` : ''}`)
 }
 
-export function getSpeciesDetail(id: string): Promise<PokemonSpeciesDetail> {
-  return api.get<PokemonSpeciesDetail>(`/pokemon/species/${id}`)
+export function getSpeciesDetail(id: string): Promise<PokemonSpecies> {
+  return api.get<PokemonSpecies>(`/pokemon/species/${id}`)
 }
 
 export function getFormDetail(id: string): Promise<PokemonForm> {
