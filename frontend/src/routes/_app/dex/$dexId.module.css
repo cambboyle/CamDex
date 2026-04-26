@@ -3,13 +3,23 @@
   max-width: 640px;
 }
 
+/* ── Sticky summary header ── */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #f9fafb;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+}
+
 /* ── Header ── */
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .headerLeft {
@@ -92,7 +102,6 @@
   background: #f3f4f6;
   border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 20px;
 }
 
 .progressFill {
@@ -104,39 +113,36 @@
 
 .progressShiny { background: #f59e0b; }
 
-/* ── Box navigation ── */
-.boxNav {
+/* ── All boxes container ── */
+.allBoxes {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
 }
 
-.navBtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  font-size: 1.2rem;
-  line-height: 1;
-  cursor: pointer;
+/* ── Individual box section ── */
+.boxSection {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #374151;
-  transition: background 0.12s, border-color 0.12s;
+  flex-direction: column;
+  gap: 6px;
 }
-.navBtn:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
-.navBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.boxHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
 
 .boxLabel {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #374151;
-  min-width: 120px;
-  text-align: center;
+}
+
+.boxRange {
+  font-size: 0.72rem;
+  color: #9ca3af;
 }
 
 /* ── Box grid ── */
@@ -250,7 +256,6 @@
   opacity: 0;
   transition: opacity 0.12s, transform 0.12s;
   z-index: 10;
-  /* keep it inside the box container */
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -260,45 +265,6 @@
 .slot:focus-visible .slotName {
   opacity: 1;
   transform: translateX(-50%) translateY(-2px);
-}
-
-/* ── Bottom nav ── */
-.bottomNav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-  gap: 12px;
-}
-
-.navBtnLg {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #374151;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-}
-.navBtnLg:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
-.navBtnLg:disabled { opacity: 0.35; cursor: not-allowed; }
-
-.pageInfo {
-  font-size: 0.82rem;
-  color: #6b7280;
-  white-space: nowrap;
-}
-
-/* ── Type pip (unused for now but available) ── */
-.typePip {
-  font-size: 0.55rem;
-  font-weight: 700;
-  padding: 1px 4px;
-  border-radius: 3px;
-  color: #fff;
-  text-transform: uppercase;
 }
 
 /* ── Error state ── */

@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { DexConfig, DexPage, DexStats, CreateDexDto, UpdateDexDto } from '@/types/dex'
+import type { DexAll, DexConfig, DexPage, DexStats, CreateDexDto, UpdateDexDto } from '@/types/dex'
 
 export function getDexes(): Promise<DexConfig[]> {
   return api.get<DexConfig[]>('/dex')
@@ -19,6 +19,10 @@ export function deleteDex(id: string): Promise<void> {
 
 export function getDexPage(id: string, page: number): Promise<DexPage> {
   return api.get<DexPage>(`/dex/${id}/page?page=${page}`)
+}
+
+export function getDexAll(id: string): Promise<DexAll> {
+  return api.get<DexAll>(`/dex/${id}/all`)
 }
 
 export function getDexStats(id: string): Promise<DexStats> {

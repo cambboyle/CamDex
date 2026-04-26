@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { JsonLoggerService } from './common/logger/json-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new JsonLoggerService();
+
+  const app = await NestFactory.create(AppModule, { logger });
 
   app.enableCors({
     origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
@@ -19,11 +22,11 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`Backend running on http://localhost:${port}`);
+  logger.log(`Backend running on http://localhost:${port}`, 'Bootstrap');
 }
 
 void bootstrap();

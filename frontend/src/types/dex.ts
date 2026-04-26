@@ -37,6 +37,12 @@ export interface DexPage {
   totalPages: number
 }
 
+export interface DexAll {
+  dex: { id: string; name: string; game: string; dexType: string }
+  entries: DexPageEntry[]
+  total: number
+}
+
 export interface CreateDexDto {
   name: string
   game?: string
