@@ -119,7 +119,7 @@ export class DexService {
     // Champions filter has no parameters; maxGen needs one.
     // Build separate param arrays + WHERE strings so each query gets
     // its own correctly-indexed $1, $2, … placeholders.
-    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+    const champCondition = `(s.is_legendary = false AND s.is_mythical = false)`;
 
     // ── Count query (no dexId param) ──────────────────────────────────────
     const countConditions = [...baseConditions];
@@ -199,7 +199,7 @@ export class DexService {
     const baseConditions: string[] = ['f.is_battle_only = FALSE'];
     if (speciesOnly) baseConditions.push('f.is_default = TRUE');
 
-    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+    const champCondition = `(s.is_legendary = false AND s.is_mythical = false)`;
 
     const conditions = [...baseConditions];
     const params: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
@@ -261,7 +261,7 @@ export class DexService {
 
     if (filter.championsOnly) {
       conditions.push(
-        `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`,
+        `(s.is_legendary = false AND s.is_mythical = false)`,
       );
     } else if (filter.maxGen) {
       params.push(filter.maxGen);

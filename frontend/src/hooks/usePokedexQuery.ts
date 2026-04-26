@@ -13,7 +13,7 @@ export interface PokedexQueryParams {
 }
 
 /** Default page size for the main Pokédex browser (infinite scroll) */
-const POKEDEX_LIMIT = 60
+const POKEDEX_LIMIT = 200
 /** Larger page size for the team builder picker — loads most game rosters in one shot */
 export const PICKER_LIMIT = 300
 

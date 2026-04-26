@@ -101,8 +101,20 @@ function PokedexPage() {
 
       <SpeciesGrid species={species} loading={isLoading} />
 
-      {/* Infinite scroll sentinel */}
+      {/* Invisible sentinel for auto-load on scroll */}
       <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />
+
+      {/* Visible load-more button as fallback */}
+      {hasNextPage && !isFetchingNextPage && (
+        <div className={styles.loadMoreRow}>
+          <button
+            className={styles.loadMoreBtn}
+            onClick={() => void fetchNextPage()}
+          >
+            Load more ({species.length} / {total})
+          </button>
+        </div>
+      )}
 
       {isFetchingNextPage && (
         <div className={styles.loadingMore} aria-live="polite">Loading more…</div>

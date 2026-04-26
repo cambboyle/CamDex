@@ -67,11 +67,8 @@ export class PokemonService {
     }
 
     if (championsOnly) {
-      // Champions launch pool: Paldean regional dex range + known additions
-      // National dex #001–375 and #388–392 cover the Paldean-adjacent roster
-      qb.andWhere(
-        '(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))',
-      );
+      // Champions uses all non-legendary, non-mythical Pokémon (standard competitive rules)
+      qb.andWhere('s.is_legendary = false AND s.is_mythical = false');
     }
 
     const [data, total] = await qb
