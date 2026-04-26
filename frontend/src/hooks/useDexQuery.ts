@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getDexes, createDex, updateDex, deleteDex,
-  getDexPage, getDexStats, markCaught, markUncaught,
+  getDexPage, getDexAll, getDexStats, markCaught, markUncaught,
 } from '@/api/dex'
 import type { CreateDexDto, UpdateDexDto } from '@/types/dex'
 
 export const DEX_KEYS = {
   all: ['dexes'] as const,
   page: (id: string, page: number) => ['dex-page', id, page] as const,
+  dexAll: (id: string) => ['dex-all', id] as const,
   stats: (id: string) => ['dex-stats', id] as const,
 }
 
@@ -15,6 +16,15 @@ export function useDexesQuery() {
   return useQuery({
     queryKey: DEX_KEYS.all,
     queryFn: getDexes,
+  })
+}
+
+export function useDexAllQuery(id: string) {
+  return useQuery({
+    queryKey: DEX_KEYS.dexAll(id),
+    queryFn: () => getDexAll(id),
+    enabled: !!id,
+    staleTime: 30_000,
   })
 }
 
@@ -60,13 +70,16 @@ export function useDeleteDex() {
   })
 }
 
-export function useToggleCaught(dexId: string, page: number) {
+export function useToggleCaught(dexId: string, page?: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ formId, caught }: { formId: string; caught: boolean }) =>
       caught ? markCaught(dexId, formId) : markUncaught(dexId, formId),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: DEX_KEYS.page(dexId, page) })
+      if (page !== undefined) {
+        void qc.invalidateQueries({ queryKey: DEX_KEYS.page(dexId, page) })
+      }
+      void qc.invalidateQueries({ queryKey: DEX_KEYS.dexAll(dexId) })
       void qc.invalidateQueries({ queryKey: DEX_KEYS.stats(dexId) })
       void qc.invalidateQueries({ queryKey: DEX_KEYS.all })
     },

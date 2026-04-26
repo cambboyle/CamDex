@@ -55,6 +55,11 @@ export class DexController {
     return this.dexService.getPage(user.sub, id, page);
   }
 
+  @Get(':id/all')
+  getAll(@CurrentUser() user: SupabaseJwtPayload, @Param('id') id: string) {
+    return this.dexService.getAll(user.sub, id);
+  }
+
   @Get(':id/stats')
   getStats(@CurrentUser() user: SupabaseJwtPayload, @Param('id') id: string) {
     return this.dexService.getStats(user.sub, id);

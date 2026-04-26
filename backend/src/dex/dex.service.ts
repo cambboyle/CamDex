@@ -13,7 +13,10 @@ import { UpdateDexDto } from './dto/update-dex.dto';
 const BOX_SIZE = 30;
 
 /** Maps a game key to its Pokémon filter — mirrors the frontend gameConfig */
-const GAME_FILTERS: Record<string, { maxGen?: number; championsOnly?: boolean }> = {
+const GAME_FILTERS: Record<
+  string,
+  { maxGen?: number; championsOnly?: boolean }
+> = {
   home: {},
   champions: { championsOnly: true },
   'scarlet-violet': { maxGen: 9 },
@@ -116,8 +119,7 @@ export class DexService {
     // Champions filter has no parameters; maxGen needs one.
     // Build separate param arrays + WHERE strings so each query gets
     // its own correctly-indexed $1, $2, … placeholders.
-    const champCondition =
-      `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
 
     // ── Count query (no dexId param) ──────────────────────────────────────
     const countConditions = [...baseConditions];
@@ -187,6 +189,59 @@ export class DexService {
     };
   }
 
+  async getAll(userId: string, dexId: string) {
+    const dex = await this.assertOwner(userId, dexId);
+
+    const filter = GAME_FILTERS[dex.game] ?? {};
+    const speciesOnly =
+      dex.dexType === 'species' || dex.dexType === 'shiny-species';
+
+    const baseConditions: string[] = ['f.is_battle_only = FALSE'];
+    if (speciesOnly) baseConditions.push('f.is_default = TRUE');
+
+    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+
+    const conditions = [...baseConditions];
+    const params: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
+
+    if (filter.championsOnly) {
+      conditions.push(champCondition);
+    } else if (filter.maxGen) {
+      params.push(filter.maxGen);
+      conditions.push(`s.generation <= $${params.length}`); // $2
+    }
+
+    const where = conditions.join(' AND ');
+
+    const rows = await this.dataSource.query<DexPageRow[]>(
+      `SELECT
+         f.id               AS "formId",
+         f.display_name     AS "displayName",
+         f.sprite_url       AS "spriteUrl",
+         f.sprite_shiny_url AS "spriteShinyUrl",
+         f.sprite_front_url AS "spriteFrontUrl",
+         f.type1,
+         f.type2,
+         f.living_dex_order AS "livingDexOrder",
+         s.national_dex_number AS "nationalDexNumber",
+         s.display_name    AS "speciesName",
+         de.caught_at      AS "caughtAt"
+       FROM pokemon_forms f
+       JOIN pokemon_species s ON s.id = f.species_id
+       LEFT JOIN dex_entries de
+         ON de.form_id = f.id AND de.dex_id = $1
+       WHERE ${where}
+       ORDER BY f.living_dex_order ASC`,
+      params,
+    );
+
+    return {
+      dex: { id: dex.id, name: dex.name, game: dex.game, dexType: dex.dexType },
+      entries: rows,
+      total: rows.length,
+    };
+  }
+
   async getStats(userId: string, dexId: string) {
     const dex = await this.assertOwner(userId, dexId);
     return this.computeStats(dex);
@@ -217,7 +272,9 @@ export class DexService {
     params.push(dex.id);
     const dexIdParam = idx;
 
-    const rows = await this.dataSource.query<{ total: string; caught: string }[]>(
+    const rows = await this.dataSource.query<
+      { total: string; caught: string }[]
+    >(
       `SELECT
          COUNT(*) AS total,
          COUNT(de.id) AS caught
@@ -240,7 +297,11 @@ export class DexService {
 
   // ── Entry toggle ──────────────────────────────────────────────────────────
 
-  async markCaught(userId: string, dexId: string, formId: string): Promise<void> {
+  async markCaught(
+    userId: string,
+    dexId: string,
+    formId: string,
+  ): Promise<void> {
     await this.assertOwner(userId, dexId);
     await this.entryRepo
       .createQueryBuilder()
@@ -251,7 +312,11 @@ export class DexService {
       .execute();
   }
 
-  async markUncaught(userId: string, dexId: string, formId: string): Promise<void> {
+  async markUncaught(
+    userId: string,
+    dexId: string,
+    formId: string,
+  ): Promise<void> {
     await this.assertOwner(userId, dexId);
     await this.entryRepo.delete({ dexId, formId });
   }
