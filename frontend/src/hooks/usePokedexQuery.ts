@@ -16,6 +16,8 @@ export interface PokedexQueryParams {
 const POKEDEX_LIMIT = 200
 /** Larger page size for the team builder picker — loads most game rosters in one shot */
 export const PICKER_LIMIT = 300
+/** Fetch the entire Pokédex in one shot for the generation-sections view */
+const ALL_LIMIT = 1500
 
 export function usePokedexQuery(params: PokedexQueryParams) {
   return useQuery({
@@ -37,6 +39,18 @@ export function usePokedexInfiniteQuery(
       const loaded = lastPage.page * lastPage.limit
       return loaded < lastPage.total ? lastPage.page + 1 : undefined
     },
+  })
+}
+
+/**
+ * Fetches all species in one request — used by the Pokédex generation-sections view.
+ * Results are grouped by generation on the consumer side.
+ */
+export function usePokedexAllQuery(params: Omit<PokedexQueryParams, 'page' | 'gen'>) {
+  return useQuery({
+    queryKey: ['pokedex-all', params],
+    queryFn: () => getSpeciesList({ ...params, limit: ALL_LIMIT }),
+    staleTime: 5 * 60 * 1000, // 5 min — data rarely changes
   })
 }
 
