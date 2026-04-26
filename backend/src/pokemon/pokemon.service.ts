@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { PokemonSpecies } from './entities/pokemon-species.entity';
 import { PokemonForm } from './entities/pokemon-form.entity';
 import { SpeciesQueryDto } from './dto/species-query.dto';
+import { CHAMPIONS_DEX_NUMBERS } from '../dex/dex.service';
 
 const TYPES = [
   'bug',
@@ -67,8 +68,10 @@ export class PokemonService {
     }
 
     if (championsOnly) {
-      // Champions uses all non-legendary, non-mythical Pokémon (standard competitive rules)
-      qb.andWhere('s.is_legendary = false AND s.is_mythical = false');
+      // Champions Regulation M-A launch roster — 186 specific species
+      qb.andWhere(`s.national_dex_number IN (:...championsNums)`, {
+        championsNums: [...CHAMPIONS_DEX_NUMBERS],
+      });
     }
 
     const [data, total] = await qb
