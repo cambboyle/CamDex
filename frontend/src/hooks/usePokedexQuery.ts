@@ -12,7 +12,10 @@ export interface PokedexQueryParams {
   page?: number
 }
 
-const POKEDEX_LIMIT = 60
+/** Default page size for the main Pokédex browser (infinite scroll) */
+const POKEDEX_LIMIT = 200
+/** Larger page size for the team builder picker — loads most game rosters in one shot */
+export const PICKER_LIMIT = 300
 
 export function usePokedexQuery(params: PokedexQueryParams) {
   return useQuery({
@@ -21,11 +24,14 @@ export function usePokedexQuery(params: PokedexQueryParams) {
   })
 }
 
-export function usePokedexInfiniteQuery(params: Omit<PokedexQueryParams, 'page'>) {
+export function usePokedexInfiniteQuery(
+  params: Omit<PokedexQueryParams, 'page'>,
+  limit = POKEDEX_LIMIT,
+) {
   return useInfiniteQuery({
-    queryKey: ['pokedex-infinite', params],
+    queryKey: ['pokedex-infinite', params, limit],
     queryFn: ({ pageParam }) =>
-      getSpeciesList({ ...params, page: pageParam as number, limit: POKEDEX_LIMIT }),
+      getSpeciesList({ ...params, page: pageParam as number, limit }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const loaded = lastPage.page * lastPage.limit

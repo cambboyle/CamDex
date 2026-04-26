@@ -34,7 +34,12 @@ export class Dex {
   @Column({ type: 'varchar', length: 50, default: 'home' })
   game: string;
 
-  @Column({ type: 'varchar', length: 30, name: 'dex_type', default: 'living-form' })
+  @Column({
+    type: 'varchar',
+    length: 30,
+    name: 'dex_type',
+    default: 'living-form',
+  })
   dexType: string;
 
   @OneToMany(() => DexEntry, (e) => e.dex, { cascade: true })

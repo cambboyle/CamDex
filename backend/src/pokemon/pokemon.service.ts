@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { PokemonSpecies } from './entities/pokemon-species.entity';
 import { PokemonForm } from './entities/pokemon-form.entity';
 import { SpeciesQueryDto } from './dto/species-query.dto';
+import { CHAMPIONS_DEX_NUMBERS } from '../dex/dex.service';
 
 const TYPES = [
   'bug',
@@ -37,7 +38,7 @@ export class PokemonService {
 
   async findAllSpecies(query: SpeciesQueryDto) {
     const page = Math.max(1, parseInt(query.page ?? '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10)));
+    const limit = Math.min(500, Math.max(1, parseInt(query.limit ?? '20', 10)));
     const gen = query.gen ? parseInt(query.gen, 10) : undefined;
     const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
     const championsOnly = query.championsOnly === 'true';
@@ -67,11 +68,10 @@ export class PokemonService {
     }
 
     if (championsOnly) {
-      // Champions launch pool: Paldean regional dex range + known additions
-      // National dex #001–375 and #388–392 cover the Paldean-adjacent roster
-      qb.andWhere(
-        '(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))',
-      );
+      // Champions Regulation M-A launch roster — 186 specific species
+      qb.andWhere(`s.national_dex_number IN (:...championsNums)`, {
+        championsNums: [...CHAMPIONS_DEX_NUMBERS],
+      });
     }
 
     const [data, total] = await qb
