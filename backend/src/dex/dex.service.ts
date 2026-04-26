@@ -12,6 +12,43 @@ import { UpdateDexDto } from './dto/update-dex.dto';
 
 const BOX_SIZE = 30;
 
+/**
+ * Official Pokémon Champions launch roster (Regulation M-A) — 186 species.
+ * Source: https://www.serebii.net/pokemonchampions/pokemon.shtml
+ * Regional forms of these species (Alolan Ninetales, Hisuian Typhlosion, etc.)
+ * are included via the form-level allowedRegions: null setting on the frontend.
+ */
+export const CHAMPIONS_DEX_NUMBERS: readonly number[] = [
+  // Gen I
+  3, 6, 9, 15, 18, 24, 25, 26, 36, 38, 59, 65, 68, 71, 80, 94, 115, 121, 127,
+  128, 130, 132, 134, 135, 136, 142, 143, 149,
+  // Gen II
+  154, 157, 160, 168, 181, 184, 186, 196, 197, 199, 205, 208, 212, 214, 227,
+  229, 248,
+  // Gen III
+  279, 282, 302, 306, 308, 310, 319, 323, 324, 334, 350, 351, 354, 358, 359,
+  362,
+  // Gen IV
+  389, 392, 395, 405, 407, 409, 411, 428, 442, 445, 448, 450, 454, 460, 461,
+  464, 470, 471, 472, 473, 475, 478, 479,
+  // Gen V
+  497, 500, 503, 505, 510, 512, 514, 516, 530, 531, 534, 547, 553, 563, 569,
+  571, 579, 584, 587, 609, 614, 618, 623, 635, 637,
+  // Gen VI
+  652, 655, 658, 660, 663, 666, 670, 671, 675, 676, 678, 681, 683, 685, 693,
+  695, 697, 699, 700, 701, 702, 706, 707, 709, 711, 713, 715,
+  // Gen VII
+  724, 727, 730, 733, 740, 745, 748, 750, 752, 758, 763, 765, 766, 778, 780,
+  784,
+  // Gen VIII
+  823, 841, 842, 844, 855, 858, 866, 867, 869, 877, 887,
+  // Gen IX
+  899, 900, 902, 903, 908, 911, 914, 925, 934, 936, 937, 939, 952, 956, 959,
+  964, 968, 970, 981, 983, 1013, 1018, 1019,
+] as const;
+
+const CHAMPIONS_IN = CHAMPIONS_DEX_NUMBERS.join(',');
+
 /** Maps a game key to its Pokémon filter — mirrors the frontend gameConfig */
 const GAME_FILTERS: Record<
   string,
@@ -119,7 +156,7 @@ export class DexService {
     // Champions filter has no parameters; maxGen needs one.
     // Build separate param arrays + WHERE strings so each query gets
     // its own correctly-indexed $1, $2, … placeholders.
-    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+    const champCondition = `s.national_dex_number IN (${CHAMPIONS_IN})`;
 
     // ── Count query (no dexId param) ──────────────────────────────────────
     const countConditions = [...baseConditions];
@@ -199,7 +236,7 @@ export class DexService {
     const baseConditions: string[] = ['f.is_battle_only = FALSE'];
     if (speciesOnly) baseConditions.push('f.is_default = TRUE');
 
-    const champCondition = `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
+    const champCondition = `s.national_dex_number IN (${CHAMPIONS_IN})`;
 
     const conditions = [...baseConditions];
     const params: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
@@ -260,9 +297,7 @@ export class DexService {
     if (speciesOnly) conditions.push('f.is_default = TRUE');
 
     if (filter.championsOnly) {
-      conditions.push(
-        `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`,
-      );
+      conditions.push(`s.national_dex_number IN (${CHAMPIONS_IN})`);
     } else if (filter.maxGen) {
       params.push(filter.maxGen);
       conditions.push(`s.generation <= $${idx++}`);
