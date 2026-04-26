@@ -270,32 +270,32 @@ export interface DexTypeConfig {
 
 export const DEX_TYPES: DexTypeConfig[] = [
   {
-    key: 'living-form',
-    label: 'Living Form Dex',
-    description: 'Every obtainable form — normal',
-    isShiny: false,
-    speciesOnly: false,
-  },
-  {
     key: 'species',
-    label: 'Pokédex',
-    description: 'One entry per species — normal',
+    label: 'Living Dex',
+    description: 'One of every species — catch the default form of each Pokémon',
     isShiny: false,
     speciesOnly: true,
   },
   {
-    key: 'shiny-form',
-    label: 'Shiny Living Form Dex',
-    description: 'Every obtainable form — ✨ shiny',
-    isShiny: true,
+    key: 'living-form',
+    label: 'Living Form Dex',
+    description: 'Every obtainable form of every Pokémon — the completionist challenge',
+    isShiny: false,
     speciesOnly: false,
   },
   {
     key: 'shiny-species',
     label: 'Shiny Dex',
-    description: 'One entry per species — ✨ shiny',
+    description: 'One shiny of every species — one shiny hunt per Pokémon',
     isShiny: true,
     speciesOnly: true,
+  },
+  {
+    key: 'shiny-form',
+    label: 'Shiny Form Dex',
+    description: 'Every shiny form of every Pokémon — the ultimate shiny challenge',
+    isShiny: true,
+    speciesOnly: false,
   },
 ]
 

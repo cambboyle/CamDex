@@ -67,10 +67,11 @@ export class DexService {
       order: { createdAt: 'ASC' },
     });
 
-    // Attach completion stats to each dex
+    // Attach completion stats in parallel — skip assertOwner since we already
+    // own these dexes (they came from the userId WHERE clause above).
     return Promise.all(
       dexes.map(async (d) => {
-        const stats = await this.getStats(userId, d.id);
+        const stats = await this.computeStats(d);
         return { ...d, stats };
       }),
     );
@@ -176,6 +177,11 @@ export class DexService {
 
   async getStats(userId: string, dexId: string) {
     const dex = await this.assertOwner(userId, dexId);
+    return this.computeStats(dex);
+  }
+
+  /** Compute stats without re-querying the dex table (caller already has the entity). */
+  private async computeStats(dex: Dex) {
     const filter = GAME_FILTERS[dex.game] ?? {};
     const speciesOnly =
       dex.dexType === 'species' || dex.dexType === 'shiny-species';
@@ -196,7 +202,7 @@ export class DexService {
     }
 
     const where = conditions.join(' AND ');
-    params.push(dexId);
+    params.push(dex.id);
     const dexIdParam = idx;
 
     const rows = await this.dataSource.query<{ total: string; caught: string }[]>(

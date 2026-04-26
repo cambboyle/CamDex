@@ -124,7 +124,6 @@ function DexBoxPage() {
                   key={entry.formId}
                   className={`${styles.slot} ${caught ? styles.slotCaught : styles.slotUncaught}`}
                   onClick={() => toggle.mutate({ formId: entry.formId, caught: !caught })}
-                  title={`${entry.displayName}${caught ? ' ✓' : ''}`}
                   aria-label={`${caught ? 'Unmark' : 'Mark'} ${entry.displayName} as caught`}
                   aria-pressed={caught}
                 >
@@ -142,9 +141,13 @@ function DexBoxPage() {
                     <span className={styles.spriteNo}>?</span>
                   )}
                   <span className={styles.slotNum}>
-                    #{String(entry.nationalDexNumber).padStart(4, '0')}
+                    #{String(entry.nationalDexNumber).padStart(3, '0')}
                   </span>
                   {caught && <span className={styles.caughtDot} aria-hidden="true" />}
+                  {/* Name tooltip on hover */}
+                  <span className={styles.slotName} aria-hidden="true">
+                    {entry.displayName}
+                  </span>
                 </button>
               )
             })}

@@ -11,7 +11,7 @@ export const Route = createFileRoute('/_app/dex/')({
 function NewDexModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState('')
   const [game, setGame] = useState('home')
-  const [dexType, setDexType] = useState('living-form')
+  const [dexType, setDexType] = useState('species')
   const create = useCreateDex()
 
   async function handleSubmit(e: React.FormEvent) {
