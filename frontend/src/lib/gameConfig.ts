@@ -215,7 +215,7 @@ export const GAMES: GameConfig[] = [
     fixedIvs: false,
     itemClause: false,
     teamSize: 6,
-    speciesFilter: { maxGen: 1 },
+    speciesFilter: { maxGen: 3 }, // national dex (Gen 1–3) unlocked post-Sevii Islands
     allowedRegions: [],
   },
   {
