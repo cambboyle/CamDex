@@ -18,7 +18,7 @@ function DexBoxPage() {
   const { dexId } = Route.useParams()
   const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useDexPageQuery(dexId, page)
+  const { data, isLoading, isError, error } = useDexPageQuery(dexId, page)
   const { data: stats } = useDexStatsQuery(dexId)
   const toggle = useToggleCaught(dexId, page)
 
@@ -105,7 +105,22 @@ function DexBoxPage() {
         </button>
       </div>
 
+      {/* ── Error state ── */}
+      {isError && (
+        <div className={styles.errorBox}>
+          <p className={styles.errorTitle}>Could not load Pokémon</p>
+          <p className={styles.errorMsg}>
+            {(error as Error)?.message ?? 'Unknown error'}
+          </p>
+          <p className={styles.errorHint}>
+            Make sure the backend is running and migrations have been applied
+            (<code>bun run migration:run</code>).
+          </p>
+        </div>
+      )}
+
       {/* ── Grid ── */}
+      {!isError && (
       <div className={styles.box}>
         {isLoading
           ? Array.from({ length: PAGE_SIZE }).map((_, i) => <SlotSkeleton key={i} />)
@@ -152,6 +167,8 @@ function DexBoxPage() {
               )
             })}
       </div>
+
+      )}
 
       {/* ── Bottom pagination ── */}
       <div className={styles.bottomNav}>
