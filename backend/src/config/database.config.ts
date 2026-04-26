@@ -13,6 +13,6 @@ export function getDatabaseConfig(config: ConfigService): TypeOrmModuleOptions {
     migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
     synchronize: false,
     migrationsRun: true,
-    logging: config.get('NODE_ENV') === 'development',
+    logging: config.get('DB_LOGGING') === 'true',
   };
 }
