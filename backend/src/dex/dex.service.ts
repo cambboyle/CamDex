@@ -109,35 +109,47 @@ export class DexService {
     const speciesOnly =
       dex.dexType === 'species' || dex.dexType === 'shiny-species';
 
-    // Build WHERE conditions
-    const conditions: string[] = ['f.is_battle_only = FALSE'];
-    // params[0] = dexId (always first for LEFT JOIN)
-    const params: unknown[] = [dexId];
-    let idx = 2;
+    // Base conditions shared by both queries (no $N placeholders)
+    const baseConditions: string[] = ['f.is_battle_only = FALSE'];
+    if (speciesOnly) baseConditions.push('f.is_default = TRUE');
 
-    if (speciesOnly) conditions.push('f.is_default = TRUE');
+    // Champions filter has no parameters; maxGen needs one.
+    // Build separate param arrays + WHERE strings so each query gets
+    // its own correctly-indexed $1, $2, … placeholders.
+    const champCondition =
+      `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`;
 
+    // ── Count query (no dexId param) ──────────────────────────────────────
+    const countConditions = [...baseConditions];
+    const countParams: unknown[] = [];
     if (filter.championsOnly) {
-      conditions.push(
-        `(s.national_dex_number <= 375 OR (s.national_dex_number >= 388 AND s.national_dex_number <= 392))`,
-      );
+      countConditions.push(champCondition);
     } else if (filter.maxGen) {
-      params.push(filter.maxGen);
-      conditions.push(`s.generation <= $${idx++}`);
+      countParams.push(filter.maxGen);
+      countConditions.push(`s.generation <= $${countParams.length}`); // $1
     }
+    const countWhere = countConditions.join(' AND ');
 
-    const where = conditions.join(' AND ');
-
-    // Count params don't include dexId — adjust slice
-    const countParams = params.slice(1);
-    const dataParams = [...params, BOX_SIZE, offset];
+    // ── Data query ($1 = dexId, then game param, then limit/offset) ───────
+    const dataConditions = [...baseConditions];
+    const dataParams: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
+    if (filter.championsOnly) {
+      dataConditions.push(champCondition);
+    } else if (filter.maxGen) {
+      dataParams.push(filter.maxGen);
+      dataConditions.push(`s.generation <= $${dataParams.length}`); // $2
+    }
+    dataParams.push(BOX_SIZE, offset);
+    const limitIdx = dataParams.length - 1;
+    const offsetIdx = dataParams.length;
+    const dataWhere = dataConditions.join(' AND ');
 
     const [countRows, rows] = await Promise.all([
       this.dataSource.query<{ count: string }[]>(
         `SELECT COUNT(*) AS count
          FROM pokemon_forms f
          JOIN pokemon_species s ON s.id = f.species_id
-         WHERE ${where}`,
+         WHERE ${countWhere}`,
         countParams,
       ),
       this.dataSource.query<DexPageRow[]>(
@@ -157,9 +169,9 @@ export class DexService {
          JOIN pokemon_species s ON s.id = f.species_id
          LEFT JOIN dex_entries de
            ON de.form_id = f.id AND de.dex_id = $1
-         WHERE ${where}
+         WHERE ${dataWhere}
          ORDER BY f.living_dex_order ASC
-         LIMIT $${idx} OFFSET $${idx + 1}`,
+         LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
         dataParams,
       ),
     ]);
