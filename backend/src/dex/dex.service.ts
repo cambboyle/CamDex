@@ -89,7 +89,7 @@ export interface DexPageRow {
 }
 
 /** Inline dex summary returned alongside page/all data */
-interface DexSummary {
+export interface DexSummary {
   id: string;
   name: string;
   game: string;
