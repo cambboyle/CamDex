@@ -68,7 +68,7 @@ const GAME_FILTERS: Record<
   'black-white': { maxGen: 5 },
   'heartgold-soulsilver': { maxGen: 4 },
   'diamond-pearl-platinum': { maxGen: 4 },
-  'firered-leafgreen': { maxGen: 1 },
+  'firered-leafgreen': { maxGen: 3 },
   'ruby-sapphire-emerald': { maxGen: 3 },
   'gold-silver-crystal': { maxGen: 2 },
   'red-blue-yellow': { maxGen: 1 },
@@ -86,6 +86,46 @@ export interface DexPageRow {
   nationalDexNumber: number;
   speciesName: string;
   caughtAt: string | null;
+}
+
+/** Inline dex summary returned alongside page/all data */
+interface DexSummary {
+  id: string;
+  name: string;
+  game: string;
+  isShiny: boolean;
+  includeForms: boolean;
+  includeCosmeticForms: boolean;
+}
+
+function dexSummary(dex: Dex): DexSummary {
+  return {
+    id: dex.id,
+    name: dex.name,
+    game: dex.game,
+    isShiny: dex.isShiny,
+    includeForms: dex.includeForms,
+    includeCosmeticForms: dex.includeCosmeticForms,
+  };
+}
+
+/**
+ * Build the form-inclusion conditions based on dex options.
+ *
+ * - species-only (includeForms=false):         f.is_default = TRUE
+ * - forms but no cosmetics (includeForms=true, includeCosmeticForms=false):
+ *     show default OR any non-cosmetic alternate form
+ * - all forms incl. cosmetics (includeForms=true, includeCosmeticForms=true):
+ *     no extra condition beyond is_battle_only = FALSE
+ */
+function buildFormConditions(dex: Dex): string[] {
+  const conds: string[] = ['f.is_battle_only = FALSE'];
+  if (!dex.includeForms) {
+    conds.push('f.is_default = TRUE');
+  } else if (!dex.includeCosmeticForms) {
+    conds.push('(f.is_default = TRUE OR f.is_cosmetic_only = FALSE)');
+  }
+  return conds;
 }
 
 @Injectable()
@@ -122,7 +162,9 @@ export class DexService {
       userId,
       name: dto.name,
       game: dto.game ?? 'home',
-      dexType: dto.dexType ?? 'living-form',
+      isShiny: dto.isShiny ?? false,
+      includeForms: dto.includeForms ?? false,
+      includeCosmeticForms: dto.includeCosmeticForms ?? false,
     });
     return this.dexRepo.save(dex);
   }
@@ -146,16 +188,8 @@ export class DexService {
     const p = Math.max(1, page);
     const offset = (p - 1) * BOX_SIZE;
     const filter = GAME_FILTERS[dex.game] ?? {};
-    const speciesOnly =
-      dex.dexType === 'species' || dex.dexType === 'shiny-species';
 
-    // Base conditions shared by both queries (no $N placeholders)
-    const baseConditions: string[] = ['f.is_battle_only = FALSE'];
-    if (speciesOnly) baseConditions.push('f.is_default = TRUE');
-
-    // Champions filter has no parameters; maxGen needs one.
-    // Build separate param arrays + WHERE strings so each query gets
-    // its own correctly-indexed $1, $2, … placeholders.
+    const baseConditions = buildFormConditions(dex);
     const champCondition = `s.national_dex_number IN (${CHAMPIONS_IN})`;
 
     // ── Count query (no dexId param) ──────────────────────────────────────
@@ -165,18 +199,18 @@ export class DexService {
       countConditions.push(champCondition);
     } else if (filter.maxGen) {
       countParams.push(filter.maxGen);
-      countConditions.push(`s.generation <= $${countParams.length}`); // $1
+      countConditions.push(`s.generation <= $${countParams.length}`);
     }
     const countWhere = countConditions.join(' AND ');
 
     // ── Data query ($1 = dexId, then game param, then limit/offset) ───────
     const dataConditions = [...baseConditions];
-    const dataParams: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
+    const dataParams: unknown[] = [dexId];
     if (filter.championsOnly) {
       dataConditions.push(champCondition);
     } else if (filter.maxGen) {
       dataParams.push(filter.maxGen);
-      dataConditions.push(`s.generation <= $${dataParams.length}`); // $2
+      dataConditions.push(`s.generation <= $${dataParams.length}`);
     }
     dataParams.push(BOX_SIZE, offset);
     const limitIdx = dataParams.length - 1;
@@ -218,7 +252,7 @@ export class DexService {
     const total = parseInt(countRows[0]?.count ?? '0', 10);
 
     return {
-      dex: { id: dex.id, name: dex.name, game: dex.game, dexType: dex.dexType },
+      dex: dexSummary(dex),
       entries: rows,
       page: p,
       total,
@@ -230,22 +264,17 @@ export class DexService {
     const dex = await this.assertOwner(userId, dexId);
 
     const filter = GAME_FILTERS[dex.game] ?? {};
-    const speciesOnly =
-      dex.dexType === 'species' || dex.dexType === 'shiny-species';
-
-    const baseConditions: string[] = ['f.is_battle_only = FALSE'];
-    if (speciesOnly) baseConditions.push('f.is_default = TRUE');
-
+    const baseConditions = buildFormConditions(dex);
     const champCondition = `s.national_dex_number IN (${CHAMPIONS_IN})`;
 
     const conditions = [...baseConditions];
-    const params: unknown[] = [dexId]; // $1 = dexId (for LEFT JOIN)
+    const params: unknown[] = [dexId];
 
     if (filter.championsOnly) {
       conditions.push(champCondition);
     } else if (filter.maxGen) {
       params.push(filter.maxGen);
-      conditions.push(`s.generation <= $${params.length}`); // $2
+      conditions.push(`s.generation <= $${params.length}`);
     }
 
     const where = conditions.join(' AND ');
@@ -273,7 +302,7 @@ export class DexService {
     );
 
     return {
-      dex: { id: dex.id, name: dex.name, game: dex.game, dexType: dex.dexType },
+      dex: dexSummary(dex),
       entries: rows,
       total: rows.length,
     };
@@ -287,14 +316,9 @@ export class DexService {
   /** Compute stats without re-querying the dex table (caller already has the entity). */
   private async computeStats(dex: Dex) {
     const filter = GAME_FILTERS[dex.game] ?? {};
-    const speciesOnly =
-      dex.dexType === 'species' || dex.dexType === 'shiny-species';
-
-    const conditions: string[] = ['f.is_battle_only = FALSE'];
+    const conditions = buildFormConditions(dex);
     const params: unknown[] = [];
     let idx = 1;
-
-    if (speciesOnly) conditions.push('f.is_default = TRUE');
 
     if (filter.championsOnly) {
       conditions.push(`s.national_dex_number IN (${CHAMPIONS_IN})`);

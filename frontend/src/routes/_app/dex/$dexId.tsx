@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useDexAllQuery, useDexStatsQuery, useToggleCaught } from '@/hooks/useDexQuery'
-import { DEX_TYPE_MAP, GAME_MAP, HOME_GAME } from '@/lib/gameConfig'
+import { GAME_MAP, HOME_GAME } from '@/lib/gameConfig'
 import type { DexPageEntry } from '@/types/dex'
 import styles from './$dexId.module.css'
 
@@ -102,8 +102,7 @@ function DexBoxPage() {
   const gameConfig = dexInfo?.game === 'home'
     ? HOME_GAME
     : (dexInfo?.game ? GAME_MAP[dexInfo.game] : null)
-  const typeConfig = dexInfo?.dexType ? DEX_TYPE_MAP[dexInfo.dexType] : null
-  const isShiny = typeConfig?.isShiny ?? false
+  const isShiny = dexInfo?.isShiny ?? false
 
   // Split into boxes of 30; pad last box to full grid
   const boxes = chunk(entries, BOX_SIZE).map((b) => {
@@ -132,7 +131,11 @@ function DexBoxPage() {
                 <span className={styles.gameBadge}>{gameConfig.shortLabel}</span>
               )}
               {isShiny && <span className={styles.shinyBadge}>✨ Shiny</span>}
-              {typeConfig && <span className={styles.typeBadge}>{typeConfig.label}</span>}
+              {dexInfo?.includeForms && (
+                <span className={styles.typeBadge}>
+                  {dexInfo.includeCosmeticForms ? 'All forms' : 'Alt forms'}
+                </span>
+              )}
             </div>
           </div>
 

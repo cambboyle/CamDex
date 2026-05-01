@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useDexesQuery, useCreateDex, useDeleteDex } from '@/hooks/useDexQuery'
-import { DEX_GAMES, DEX_TYPES, DEX_TYPE_MAP, GAME_MAP, HOME_GAME } from '@/lib/gameConfig'
+import { DEX_GAMES, GAME_MAP, HOME_GAME } from '@/lib/gameConfig'
 import styles from './index.module.css'
 
 export const Route = createFileRoute('/_app/dex/')({
@@ -11,13 +11,22 @@ export const Route = createFileRoute('/_app/dex/')({
 function NewDexModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState('')
   const [game, setGame] = useState('home')
-  const [dexType, setDexType] = useState('species')
+  const [isShiny, setIsShiny] = useState(false)
+  const [includeForms, setIncludeForms] = useState(false)
+  const [includeCosmeticForms, setIncludeCosmeticForms] = useState(false)
   const create = useCreateDex()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    await create.mutateAsync({ name: name.trim(), game, dexType })
+    await create.mutateAsync({
+      name: name.trim(),
+      game,
+      isShiny,
+      includeForms,
+      // cosmetic forms only apply when alternate forms are also enabled
+      includeCosmeticForms: includeForms && includeCosmeticForms,
+    })
     onClose()
   }
 
@@ -26,6 +35,7 @@ function NewDexModal({ onClose }: { onClose: () => void }) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h2 className={styles.modalTitle}>New Dex Tracker</h2>
         <form onSubmit={(e) => void handleSubmit(e)} className={styles.form}>
+
           <label className={styles.label}>
             Name
             <input
@@ -52,25 +62,59 @@ function NewDexModal({ onClose }: { onClose: () => void }) {
             </select>
           </label>
 
-          <label className={styles.label}>
-            Dex Type
-            <select
-              className={styles.select}
-              value={dexType}
-              onChange={(e) => setDexType(e.target.value)}
-            >
-              {DEX_TYPES.map((t) => (
-                <option key={t.key} value={t.key}>{t.label}</option>
-              ))}
-            </select>
-          </label>
+          <fieldset className={styles.checkboxGroup}>
+            <legend className={styles.checkboxLegend}>Tracking options</legend>
 
-          {DEX_TYPE_MAP[dexType] && (
-            <p className={styles.hint}>{DEX_TYPE_MAP[dexType].description}</p>
-          )}
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={isShiny}
+                onChange={(e) => setIsShiny(e.target.checked)}
+              />
+              <span>
+                <strong>✨ Shiny dex</strong>
+                <span className={styles.checkboxHint}>Track shiny forms instead of normal</span>
+              </span>
+            </label>
+
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={includeForms}
+                onChange={(e) => {
+                  setIncludeForms(e.target.checked)
+                  if (!e.target.checked) setIncludeCosmeticForms(false)
+                }}
+              />
+              <span>
+                <strong>Track alternate forms</strong>
+                <span className={styles.checkboxHint}>
+                  Include regional variants, Mega evolutions, G-Max forms, etc.
+                </span>
+              </span>
+            </label>
+
+            <label className={`${styles.checkboxLabel} ${!includeForms ? styles.checkboxDisabled : ''}`}>
+              <input
+                type="checkbox"
+                checked={includeCosmeticForms}
+                disabled={!includeForms}
+                onChange={(e) => setIncludeCosmeticForms(e.target.checked)}
+              />
+              <span>
+                <strong>Track cosmetic forms</strong>
+                <span className={styles.checkboxHint}>
+                  Also include purely visual variants — Unown letters, Vivillon
+                  wing patterns, Alcremie cream colours, Furfrou trims, etc.
+                </span>
+              </span>
+            </label>
+          </fieldset>
 
           <div className={styles.actions}>
-            <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+            <button type="button" className={styles.cancelBtn} onClick={onClose}>
+              Cancel
+            </button>
             <button
               type="submit"
               className={styles.createBtn}
@@ -116,11 +160,9 @@ function DexListPage() {
         <div className={styles.grid}>
           {dexes?.map((dex) => {
             const gameConfig = dex.game === 'home' ? HOME_GAME : GAME_MAP[dex.game]
-            const typeConfig = DEX_TYPE_MAP[dex.dexType]
             const pct = dex.stats?.completionPercent ?? 0
             const caught = dex.stats?.caught ?? 0
             const total = dex.stats?.total ?? 0
-            const isShiny = typeConfig?.isShiny ?? false
 
             return (
               <Link
@@ -136,8 +178,14 @@ function DexListPage() {
                       <span className={styles.gameBadge}>
                         {gameConfig?.shortLabel ?? dex.game}
                       </span>
-                      {isShiny && <span className={styles.shinyBadge}>✨ Shiny</span>}
-                      <span className={styles.typeBadge}>{typeConfig?.label ?? dex.dexType}</span>
+                      {dex.isShiny && (
+                        <span className={styles.shinyBadge}>✨ Shiny</span>
+                      )}
+                      {dex.includeForms && (
+                        <span className={styles.typeBadge}>
+                          {dex.includeCosmeticForms ? 'All forms' : 'Alt forms'}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className={styles.ringWrap}>
@@ -146,7 +194,7 @@ function DexListPage() {
                       <circle
                         cx={30} cy={30} r={24}
                         fill="none"
-                        stroke={isShiny ? '#f59e0b' : '#22c55e'}
+                        stroke={dex.isShiny ? '#f59e0b' : '#22c55e'}
                         strokeWidth={6}
                         strokeLinecap="round"
                         strokeDasharray={2 * Math.PI * 24}
@@ -163,7 +211,7 @@ function DexListPage() {
 
                 <div className={styles.progressBar}>
                   <div
-                    className={`${styles.progressFill} ${isShiny ? styles.progressShiny : ''}`}
+                    className={`${styles.progressFill} ${dex.isShiny ? styles.progressShiny : ''}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>

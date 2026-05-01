@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 
 const VALID_GAMES = [
   'home',
@@ -21,13 +21,6 @@ const VALID_GAMES = [
   'red-blue-yellow',
 ] as const;
 
-const VALID_DEX_TYPES = [
-  'living-form',
-  'species',
-  'shiny-form',
-  'shiny-species',
-] as const;
-
 export class CreateDexDto {
   @IsString()
   @MaxLength(60)
@@ -37,7 +30,18 @@ export class CreateDexDto {
   @IsIn(VALID_GAMES)
   game?: string;
 
+  /** Track shiny sprites instead of normal */
   @IsOptional()
-  @IsIn(VALID_DEX_TYPES)
-  dexType?: string;
+  @IsBoolean()
+  isShiny?: boolean;
+
+  /** Include alternate/regional/mega forms (not just the default form per species) */
+  @IsOptional()
+  @IsBoolean()
+  includeForms?: boolean;
+
+  /** Also include purely cosmetic variants (Unown letters, Vivillon patterns, etc.) */
+  @IsOptional()
+  @IsBoolean()
+  includeCosmeticForms?: boolean;
 }

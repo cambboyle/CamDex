@@ -84,4 +84,13 @@ export class PokemonForm {
 
   @Column({ type: 'int', name: 'living_dex_order' })
   livingDexOrder: number;
+
+  /**
+   * True for forms that are purely visual — same typing and base stats as the
+   * species' default form, but a different appearance (Unown letters, Vivillon
+   * wing patterns, Alcremie cream colours, Furfrou trims, etc.).
+   * Set automatically by the RefactorDexOptions migration.
+   */
+  @Column({ type: 'boolean', name: 'is_cosmetic_only', default: false })
+  isCosmeticOnly: boolean;
 }

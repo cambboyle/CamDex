@@ -11,14 +11,12 @@ import { DexEntry } from './dex-entry.entity';
 /**
  * A user-created dex tracker configuration.
  *
- * game: any game key ("champions" | "scarlet-violet" | … | "home")
- *   "home" means the full national dex — no Pokémon filter applied.
- *
- * dexType:
- *   "living-form"    — every obtainable non-battle-only form, normal
- *   "species"        — one entry per species (default form only), normal
- *   "shiny-form"     — every form, tracking shinies
- *   "shiny-species"  — one per species, tracking shinies
+ * game            — any game key ("home" | "champions" | "scarlet-violet" | …)
+ * isShiny         — track shiny sprites instead of normal
+ * includeForms    — track alternate/regional/mega forms (not just default forms)
+ * includeCosmeticForms — also track purely visual variants (Unown letters,
+ *                        Vivillon patterns, Alcremie cream colours, etc.)
+ *                        Only meaningful when includeForms is true.
  */
 @Entity('dexes')
 export class Dex {
@@ -34,13 +32,14 @@ export class Dex {
   @Column({ type: 'varchar', length: 50, default: 'home' })
   game: string;
 
-  @Column({
-    type: 'varchar',
-    length: 30,
-    name: 'dex_type',
-    default: 'living-form',
-  })
-  dexType: string;
+  @Column({ type: 'boolean', name: 'is_shiny', default: false })
+  isShiny: boolean;
+
+  @Column({ type: 'boolean', name: 'include_forms', default: false })
+  includeForms: boolean;
+
+  @Column({ type: 'boolean', name: 'include_cosmetic_forms', default: false })
+  includeCosmeticForms: boolean;
 
   @OneToMany(() => DexEntry, (e) => e.dex, { cascade: true })
   entries: DexEntry[];

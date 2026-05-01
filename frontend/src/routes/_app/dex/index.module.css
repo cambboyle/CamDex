@@ -258,3 +258,61 @@
 }
 .createBtn:hover:not(:disabled) { background: #4338ca; }
 .createBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Checkbox group ──────────────────────────────────────────────────────── */
+
+.checkboxGroup {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkboxLegend {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 4px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+.checkboxLabel > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkboxHint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.checkboxDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.checkboxDisabled input { cursor: not-allowed; }

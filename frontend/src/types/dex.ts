@@ -9,7 +9,9 @@ export interface DexConfig {
   userId: string
   name: string
   game: string
-  dexType: string
+  isShiny: boolean
+  includeForms: boolean
+  includeCosmeticForms: boolean
   createdAt: string
   updatedAt: string
   stats?: DexStats
@@ -29,8 +31,18 @@ export interface DexPageEntry {
   caughtAt: string | null
 }
 
+/** Inline dex summary embedded in page/all responses */
+export interface DexSummary {
+  id: string
+  name: string
+  game: string
+  isShiny: boolean
+  includeForms: boolean
+  includeCosmeticForms: boolean
+}
+
 export interface DexPage {
-  dex: { id: string; name: string; game: string; dexType: string }
+  dex: DexSummary
   entries: DexPageEntry[]
   page: number
   total: number
@@ -38,7 +50,7 @@ export interface DexPage {
 }
 
 export interface DexAll {
-  dex: { id: string; name: string; game: string; dexType: string }
+  dex: DexSummary
   entries: DexPageEntry[]
   total: number
 }
@@ -46,7 +58,9 @@ export interface DexAll {
 export interface CreateDexDto {
   name: string
   game?: string
-  dexType?: string
+  isShiny?: boolean
+  includeForms?: boolean
+  includeCosmeticForms?: boolean
 }
 
 export interface UpdateDexDto {
