@@ -57,7 +57,7 @@ function SpeciesDetailPage() {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <Link to="/pokedex/" className={styles.back}>← Back to Pokédex</Link>
+        <Link to="/pokedex/" className={styles.back}>← Pokédex</Link>
         <div className={styles.skeleton} />
       </div>
     )
@@ -66,7 +66,7 @@ function SpeciesDetailPage() {
   if (isError || !species) {
     return (
       <div className={styles.page}>
-        <Link to="/pokedex/" className={styles.back}>← Back to Pokédex</Link>
+        <Link to="/pokedex/" className={styles.back}>← Pokédex</Link>
         <p className={styles.error}>Species not found.</p>
       </div>
     )
@@ -83,7 +83,10 @@ function SpeciesDetailPage() {
 
   return (
     <div className={styles.page}>
-      <Link to="/pokedex/" className={styles.back}>← Back to Pokédex</Link>
+      <div className={styles.topNav}>
+        <Link to="/pokedex/" className={styles.back}>← Pokédex</Link>
+        <Link to="/dex/" className={styles.dexCta}>Track in dex →</Link>
+      </div>
 
       <div className={styles.layout}>
         {/* ── Left panel ── */}

@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { usePokedexAllQuery, useTypesQuery } from '@/hooks/usePokedexQuery'
 import { SpeciesGrid } from '@/components/pokedex/SpeciesGrid'
@@ -57,10 +57,15 @@ function PokedexPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Pokédex</h1>
-        {!isLoading && (
-          <span className={styles.count}>{total.toLocaleString()} species</span>
-        )}
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Pokédex</h1>
+          {!isLoading && (
+            <span className={styles.count}>{total.toLocaleString()} species</span>
+          )}
+        </div>
+        <Link to="/dex/" className={styles.dexLink}>
+          My Dexes →
+        </Link>
       </div>
 
       <div className={styles.filters}>
