@@ -242,3 +242,77 @@
 
   .leftPanel { position: static; }
 }
+
+/* ── Dex status panel ── */
+.dexStatusList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dexRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dexRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.dexRowName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+}
+
+.dexRowName:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+.shinyPip {
+  font-size: 0.7rem;
+}
+
+.dexRowForms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.formPill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.formPill:hover {
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.formPillCaught {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #15803d;
+}
+
+.formPillCaught:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
