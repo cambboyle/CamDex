@@ -38,10 +38,15 @@ export class PokemonService {
 
   async findAllSpecies(query: SpeciesQueryDto) {
     const page = Math.max(1, parseInt(query.page ?? '1', 10));
-    const limit = Math.min(1500, Math.max(1, parseInt(query.limit ?? '20', 10)));
+    const limit = Math.min(
+      1500,
+      Math.max(1, parseInt(query.limit ?? '20', 10)),
+    );
     const gen = query.gen ? parseInt(query.gen, 10) : undefined;
     const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
-    const maxDexNumber = query.maxDexNumber ? parseInt(query.maxDexNumber, 10) : undefined;
+    const maxDexNumber = query.maxDexNumber
+      ? parseInt(query.maxDexNumber, 10)
+      : undefined;
     const championsOnly = query.championsOnly === 'true';
 
     // ── Step 1: paginate species only (no form join) ──────────────────────
@@ -75,7 +80,9 @@ export class PokemonService {
     }
 
     if (maxDexNumber) {
-      speciesQb.andWhere('s.national_dex_number <= :maxDexNumber', { maxDexNumber });
+      speciesQb.andWhere('s.national_dex_number <= :maxDexNumber', {
+        maxDexNumber,
+      });
     }
 
     if (championsOnly) {
@@ -105,7 +112,7 @@ export class PokemonService {
 
       const bySpecies = new Map<string, PokemonForm[]>();
       for (let i = 0; i < forms.length; i++) {
-        const sid = raw[i].f_species_id as string;
+        const sid = (raw[i] as Record<string, string>)['f_species_id'];
         if (!bySpecies.has(sid)) bySpecies.set(sid, []);
         bySpecies.get(sid)!.push(forms[i]);
       }

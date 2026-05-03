@@ -38,7 +38,9 @@ describe('buildFormConditions', () => {
       makeDex({ includeForms: true, includeCosmeticForms: false }),
     );
     expect(conds).toContain('f.is_battle_only = FALSE');
-    expect(conds).toContain('(f.is_default = TRUE OR f.is_cosmetic_only = FALSE)');
+    expect(conds).toContain(
+      '(f.is_default = TRUE OR f.is_cosmetic_only = FALSE)',
+    );
     expect(conds).toHaveLength(2);
   });
 
@@ -127,7 +129,11 @@ describe('DexService', () => {
     });
 
     it('passes through provided flags', async () => {
-      const dex = makeDex({ isShiny: true, includeForms: true, includeCosmeticForms: true });
+      const dex = makeDex({
+        isShiny: true,
+        includeForms: true,
+        includeCosmeticForms: true,
+      });
       mockDexRepo.create.mockReturnValue(dex);
       mockDexRepo.save.mockResolvedValue(dex);
 
@@ -165,7 +171,10 @@ describe('DexService', () => {
 
       await service.markCaught('user-1', 'dex-1', 'form-abc');
 
-      expect(mockQb.values).toHaveBeenCalledWith({ dexId: 'dex-1', formId: 'form-abc' });
+      expect(mockQb.values).toHaveBeenCalledWith({
+        dexId: 'dex-1',
+        formId: 'form-abc',
+      });
       expect(mockQb.orIgnore).toHaveBeenCalled();
     });
   });

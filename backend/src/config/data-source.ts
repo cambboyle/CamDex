@@ -13,8 +13,7 @@ if (!dbUrl) {
 }
 
 // Use SSL whenever the host is not localhost / 127.0.0.1 (i.e. for Supabase)
-const isLocal =
-  dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
+const isLocal = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
 
 export const AppDataSource = new DataSource({
   type: 'postgres',

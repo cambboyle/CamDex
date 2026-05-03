@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BoxService } from './box.service';
@@ -100,7 +104,9 @@ describe('BoxService', () => {
     });
 
     it('throws ForbiddenException for a box owned by another user', async () => {
-      mockBoxRepo.findOneBy.mockResolvedValue(makeBox({ userId: 'other-user' }));
+      mockBoxRepo.findOneBy.mockResolvedValue(
+        makeBox({ userId: 'other-user' }),
+      );
       await expect(service.deleteBox('user-1', 'box-1')).rejects.toThrow(
         ForbiddenException,
       );
@@ -162,7 +168,9 @@ describe('BoxService', () => {
 
     it('swaps Pokémon when target slot is occupied', async () => {
       mockBoxRepo.findOneBy.mockResolvedValue(makeBox());
-      mockPokemonRepo.findOneBy.mockResolvedValue(makePokemon({ id: 'pkmn-1' }));
+      mockPokemonRepo.findOneBy.mockResolvedValue(
+        makePokemon({ id: 'pkmn-1' }),
+      );
 
       // pkmn-1 is currently in slot 0
       const sourceSlot = Object.assign(new BoxSlot(), {
@@ -198,7 +206,9 @@ describe('BoxService', () => {
 
     it('throws ForbiddenException when Pokémon belongs to another user', async () => {
       mockBoxRepo.findOneBy.mockResolvedValue(makeBox());
-      mockPokemonRepo.findOneBy.mockResolvedValue(makePokemon({ userId: 'other-user' }));
+      mockPokemonRepo.findOneBy.mockResolvedValue(
+        makePokemon({ userId: 'other-user' }),
+      );
 
       await expect(
         service.placePokemon('user-1', 'box-1', {
@@ -217,7 +227,10 @@ describe('BoxService', () => {
         userPokemonId: 'pkmn-1',
       });
       mockSlotRepo.findOne.mockResolvedValue(existingSlot);
-      mockSlotRepo.save.mockResolvedValue({ ...existingSlot, userPokemonId: null });
+      mockSlotRepo.save.mockResolvedValue({
+        ...existingSlot,
+        userPokemonId: null,
+      });
 
       await service.placePokemon('user-1', 'box-1', {
         slotPosition: 3,

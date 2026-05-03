@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TeamService } from './team.service';
@@ -77,7 +81,10 @@ describe('TeamService', () => {
     it('accepts slot 1', async () => {
       mockTeamRepo.findOne.mockResolvedValue(makeTeam());
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -89,7 +96,10 @@ describe('TeamService', () => {
     it('accepts slot 6', async () => {
       mockTeamRepo.findOne.mockResolvedValue(makeTeam());
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 6 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 6,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -125,7 +135,10 @@ describe('TeamService', () => {
     it('accepts maximum valid spread (252/252/4 = 508)', async () => {
       mockTeamRepo.findOne.mockResolvedValue(standardTeam());
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -141,7 +154,10 @@ describe('TeamService', () => {
     it('accepts all-zero EVs', async () => {
       mockTeamRepo.findOne.mockResolvedValue(standardTeam());
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -178,7 +194,10 @@ describe('TeamService', () => {
       mockTeamRepo.findOne.mockResolvedValue(champTeam());
       mockMemberRepo.find.mockResolvedValue([]); // Item Clause check
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -195,7 +214,10 @@ describe('TeamService', () => {
       // 32 should be fine for scarlet-violet — the Champions limit should not apply
       mockTeamRepo.findOne.mockResolvedValue(standardTeam());
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -229,7 +251,11 @@ describe('TeamService', () => {
       mockMemberRepo.find.mockResolvedValue([
         Object.assign(new TeamMember(), { slot: 1, heldItem: 'life-orb' }),
       ]);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1, heldItem: 'life-orb' });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+        heldItem: 'life-orb',
+      });
       mockMemberRepo.findOne.mockResolvedValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
@@ -239,15 +265,22 @@ describe('TeamService', () => {
     });
 
     it('does not enforce Item Clause in non-Champions games', async () => {
-      mockTeamRepo.findOne.mockResolvedValue(makeTeam({ game: 'scarlet-violet' }));
+      mockTeamRepo.findOne.mockResolvedValue(
+        makeTeam({ game: 'scarlet-violet' }),
+      );
       // Even if another slot has the same item, it should be allowed
       mockMemberRepo.findOne.mockResolvedValue(null);
-      const member = Object.assign(new TeamMember(), { teamId: 'team-1', slot: 1 });
+      const member = Object.assign(new TeamMember(), {
+        teamId: 'team-1',
+        slot: 1,
+      });
       mockMemberRepo.create.mockReturnValue(member);
       mockMemberRepo.save.mockResolvedValue(member);
 
       // mockMemberRepo.find should NOT be called for non-champions games
-      await service.upsertMember('user-1', 'team-1', 1, { heldItem: 'life-orb' });
+      await service.upsertMember('user-1', 'team-1', 1, {
+        heldItem: 'life-orb',
+      });
       expect(mockMemberRepo.find).not.toHaveBeenCalled();
     });
   });
@@ -264,7 +297,9 @@ describe('TeamService', () => {
 
     it('throws ForbiddenException when team belongs to another user', async () => {
       // findOne (for assertOwner in remove) returns a team owned by another user
-      mockTeamRepo.findOne.mockResolvedValue(makeTeam({ userId: 'other-user' }));
+      mockTeamRepo.findOne.mockResolvedValue(
+        makeTeam({ userId: 'other-user' }),
+      );
       await expect(service.remove('user-1', 'team-1')).rejects.toThrow(
         ForbiddenException,
       );
