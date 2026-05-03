@@ -43,43 +43,74 @@ export class PokemonService {
     const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
     const championsOnly = query.championsOnly === 'true';
 
-    const qb = this.speciesRepo
+    // ── Step 1: paginate species only (no form join) ──────────────────────
+    // Using leftJoinAndSelect + take/skip causes TypeORM to limit on *rows*
+    // rather than *entities*, so species with many forms (Unown: 28) eat the
+    // row budget and fewer species than expected are returned.  Paginating the
+    // species query alone gives the correct count and IDs; forms are loaded
+    // separately below.
+    const speciesQb = this.speciesRepo
       .createQueryBuilder('s')
-      .leftJoinAndSelect('s.forms', 'f')
-      .orderBy('s.nationalDexNumber', 'ASC')
-      .addOrderBy('f.livingDexOrder', 'ASC');
+      .orderBy('s.nationalDexNumber', 'ASC');
 
     if (query.search) {
-      qb.andWhere('s.display_name ILIKE :search', {
+      speciesQb.andWhere('s.display_name ILIKE :search', {
         search: `%${query.search}%`,
       });
     }
 
+    // Type filter: keep only species that have at least one form of that type
     if (query.type) {
-      qb.andWhere('(f.type1 = :type OR f.type2 = :type)', { type: query.type });
+      speciesQb.andWhere(
+        `s.id IN (SELECT f.species_id FROM pokemon_forms f WHERE f.type1 = :type OR f.type2 = :type)`,
+        { type: query.type },
+      );
     }
 
     if (gen) {
-      // Exact generation (Pokédex filter)
-      qb.andWhere('s.generation = :gen', { gen });
+      speciesQb.andWhere('s.generation = :gen', { gen });
     } else if (maxGen) {
-      // Up-to generation (team builder filter)
-      qb.andWhere('s.generation <= :maxGen', { maxGen });
+      speciesQb.andWhere('s.generation <= :maxGen', { maxGen });
     }
 
     if (championsOnly) {
-      // Champions Regulation M-A launch roster — 186 specific species
-      qb.andWhere(`s.national_dex_number IN (:...championsNums)`, {
+      speciesQb.andWhere(`s.national_dex_number IN (:...championsNums)`, {
         championsNums: [...CHAMPIONS_DEX_NUMBERS],
       });
     }
 
-    const [data, total] = await qb
+    const [species, total] = await speciesQb
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
 
-    return { data, total, page, limit };
+    // ── Step 2: load forms for the paginated species ──────────────────────
+    if (species.length > 0) {
+      const ids = species.map((s) => s.id);
+
+      // getRawAndEntities gives us both the typed entity AND the raw SQL row.
+      // TypeORM aliases each selected column as "<alias>_<column>", so the
+      // species FK is available as raw.f_species_id without needing an
+      // explicit @Column declaration on the entity.
+      const { entities: forms, raw } = await this.formRepo
+        .createQueryBuilder('f')
+        .where('f.species_id IN (:...ids)', { ids })
+        .orderBy('f.living_dex_order', 'ASC')
+        .getRawAndEntities();
+
+      const bySpecies = new Map<string, PokemonForm[]>();
+      for (let i = 0; i < forms.length; i++) {
+        const sid = raw[i].f_species_id as string;
+        if (!bySpecies.has(sid)) bySpecies.set(sid, []);
+        bySpecies.get(sid)!.push(forms[i]);
+      }
+
+      for (const s of species) {
+        s.forms = bySpecies.get(s.id) ?? [];
+      }
+    }
+
+    return { data: species, total, page, limit };
   }
 
   async findSpeciesById(id: string): Promise<PokemonSpecies> {
