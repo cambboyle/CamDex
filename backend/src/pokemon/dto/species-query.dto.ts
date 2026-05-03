@@ -19,6 +19,11 @@ export class SpeciesQueryDto {
   @IsNumberString()
   maxGen?: string;
 
+  /** Max national dex number — excludes Pokémon above this number regardless of generation */
+  @IsOptional()
+  @IsNumberString()
+  maxDexNumber?: string;
+
   /** When "true", restricts results to Pokémon available in Pokémon Champions */
   @IsOptional()
   @IsString()

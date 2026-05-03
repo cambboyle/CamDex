@@ -21,7 +21,7 @@ export interface GameConfig {
   /** Team size for building (always 6 for full teams) */
   teamSize: 6
   /** Query params for the species endpoint */
-  speciesFilter: { maxGen?: number; championsOnly?: boolean }
+  speciesFilter: { maxGen?: number; maxDexNumber?: number; championsOnly?: boolean }
   /**
    * Which regional variant names are obtainable in this game's team builder.
    * null  = no restriction (all regional forms allowed)
@@ -72,7 +72,10 @@ export const GAMES: GameConfig[] = [
     fixedIvs: false,
     itemClause: false,
     teamSize: 6,
-    speciesFilter: { maxGen: 8 },
+    // maxDexNumber: 898 — Pokémon #899–905 (Wyrdeer, Kleavor, Ursaluna, Basculegion,
+    // Sneasler, Overqwil, Enamorus) are classified as Gen 8 in PokéAPI because they
+    // debuted in Legends: Arceus, but they are not available in Sword/Shield.
+    speciesFilter: { maxGen: 8, maxDexNumber: 898 },
     allowedRegions: ['alola', 'galar'], // Galarian native; Alolan obtainable via transfer
   },
   {

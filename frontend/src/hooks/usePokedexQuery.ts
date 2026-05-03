@@ -7,6 +7,8 @@ export interface PokedexQueryParams {
   gen?: number
   /** Show all Pokémon introduced up to and including this generation */
   maxGen?: number
+  /** Cap by national dex number — used where gen boundary ≠ game boundary (e.g. SwSh vs PLA) */
+  maxDexNumber?: number
   /** Restrict to the Pokémon Champions launch roster */
   championsOnly?: boolean
   page?: number

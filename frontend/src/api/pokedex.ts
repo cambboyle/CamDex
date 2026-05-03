@@ -6,6 +6,7 @@ export interface SpeciesListParams {
   type?: string
   gen?: number
   maxGen?: number
+  maxDexNumber?: number
   championsOnly?: boolean
   page?: number
   limit?: number
@@ -17,6 +18,7 @@ export function getSpeciesList(params: SpeciesListParams = {}): Promise<Paginate
   if (params.type) query.set('type', params.type)
   if (params.gen) query.set('gen', String(params.gen))
   if (params.maxGen) query.set('maxGen', String(params.maxGen))
+  if (params.maxDexNumber) query.set('maxDexNumber', String(params.maxDexNumber))
   if (params.championsOnly) query.set('championsOnly', 'true')
   if (params.page) query.set('page', String(params.page))
   if (params.limit) query.set('limit', String(params.limit))

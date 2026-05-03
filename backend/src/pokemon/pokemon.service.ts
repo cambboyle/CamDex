@@ -41,6 +41,7 @@ export class PokemonService {
     const limit = Math.min(1500, Math.max(1, parseInt(query.limit ?? '20', 10)));
     const gen = query.gen ? parseInt(query.gen, 10) : undefined;
     const maxGen = query.maxGen ? parseInt(query.maxGen, 10) : undefined;
+    const maxDexNumber = query.maxDexNumber ? parseInt(query.maxDexNumber, 10) : undefined;
     const championsOnly = query.championsOnly === 'true';
 
     // ── Step 1: paginate species only (no form join) ──────────────────────
@@ -71,6 +72,10 @@ export class PokemonService {
       speciesQb.andWhere('s.generation = :gen', { gen });
     } else if (maxGen) {
       speciesQb.andWhere('s.generation <= :maxGen', { maxGen });
+    }
+
+    if (maxDexNumber) {
+      speciesQb.andWhere('s.national_dex_number <= :maxDexNumber', { maxDexNumber });
     }
 
     if (championsOnly) {
