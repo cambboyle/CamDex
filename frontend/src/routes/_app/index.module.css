@@ -1,98 +1,168 @@
 .page {
   padding: 24px;
-  max-width: 900px;
+  max-width: 960px;
 }
 
 .title {
   font-size: 1.75rem;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
-/* ── Top row: dex card + quick links ── */
-.topRow {
+/* ── Sections ── */
+.section {
+  margin-bottom: 36px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin: 0 0 14px;
+}
+
+.sectionHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
+.sectionLink {
+  font-size: 0.82rem;
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sectionLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Dex grid ── */
+.dexGrid {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 16px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
 }
 
-/* ── Living Dex card ── */
+/* ── Dex card ── */
 .dexCard {
   background: #fff;
   border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 18px 20px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
+  transition: box-shadow 0.15s, transform 0.15s;
+  border: 1.5px solid transparent;
 }
 
-.cardTitle {
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #6b7280;
-  margin: 0;
+.dexCard:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  border-color: #e0e7ff;
 }
 
-.dexCardBody {
+.dexCardTop {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
 }
 
-.dexStats {
+.dexCardInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 
-.stat {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.statVal {
-  font-size: 1.8rem;
-  font-weight: 700;
+.dexName {
+  font-size: 1rem;
+  font-weight: 600;
   color: #1f2937;
-  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.statLabel {
+.dexGame {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.dexCount {
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
-.shinyStat {
+.ringSkeleton {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  flex-shrink: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dexCardFooter {
+  border-top: 1px solid #f3f4f6;
+  padding: 10px 0;
+}
+
+.dexCardLink {
   font-size: 0.82rem;
-  color: #6b7280;
-  margin: 0;
+  color: #4f46e5;
+  font-weight: 500;
 }
 
-.empty {
-  font-size: 0.9rem;
+/* ── Skeleton cards ── */
+.dexCardSkeleton {
+  height: 150px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-align: center;
   color: #9ca3af;
-  margin: 0;
 }
 
-.cardLink {
-  font-size: 0.85rem;
+.emptyState p {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.emptyLink {
+  font-size: 0.88rem;
   color: #4f46e5;
   text-decoration: none;
   font-weight: 500;
-  border-top: 1px solid #f3f4f6;
-  padding-top: 12px;
 }
 
-.cardLink:hover { text-decoration: underline; }
+.emptyLink:hover {
+  text-decoration: underline;
+}
 
-/* ── Quick link cards ── */
+/* ── Quick links ── */
 .quickLinks {
   display: flex;
   flex-direction: column;
@@ -103,7 +173,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 14px 18px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -112,7 +182,7 @@
 }
 
 .quickCard:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
@@ -134,22 +204,20 @@
   font-size: 1rem;
 }
 
-/* ── Skeleton ── */
-.skeleton {
-  height: 100px;
-  background: #e5e7eb;
-  border-radius: 8px;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
+/* ── Animations ── */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .topRow {
+  .dexGrid {
     grid-template-columns: 1fr;
   }
 }
