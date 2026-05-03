@@ -15,39 +15,6 @@ export interface UserPokemon {
   notes: string | null
 }
 
-export interface LivingDexEntry {
-  formId: string
-  formKey: string
-  displayName: string
-  isDefault: boolean
-  isMega: boolean
-  isGmax: boolean
-  isRegionalVariant: boolean
-  regionVariantName: string | null
-  type1: string | null
-  type2: string | null
-  spriteUrl: string | null
-  spriteShinyUrl: string | null
-  spriteFrontUrl: string | null
-  livingDexOrder: number
-  nationalDexNumber: number
-  speciesDisplayName: string
-  caughtId: string | null
-  caughtShinyId: string | null
-}
-
-export interface LivingDexStats {
-  totalForms: number
-  caughtForms: number
-  shinyCaught: number
-  completionPercent: number
-}
-
-export interface LivingDexResponse {
-  entries: LivingDexEntry[]
-  stats: LivingDexStats
-}
-
 export interface Box {
   id: string
   userId: string
@@ -82,17 +49,4 @@ export interface BoxPokemon {
     displayName: string
     nationalDexNumber: number
   }
-}
-
-export interface AddPokemonDto {
-  formId: string
-  nickname?: string
-  isShiny?: boolean
-  ball?: string
-  gender?: string
-  gameOfOrigin?: string
-  otName?: string
-  level?: number
-  nature?: string
-  notes?: string
 }
