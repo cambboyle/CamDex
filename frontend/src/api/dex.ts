@@ -29,6 +29,15 @@ export function getDexStats(id: string): Promise<DexStats> {
   return api.get<DexStats>(`/dex/${id}/stats`)
 }
 
+export function checkCaught(
+  dexId: string,
+  formIds: string[],
+): Promise<Record<string, boolean>> {
+  return api.get<Record<string, boolean>>(
+    `/dex/${dexId}/entries/check?formIds=${formIds.join(',')}`,
+  )
+}
+
 export function markCaught(dexId: string, formId: string): Promise<void> {
   return api.post<void>(`/dex/${dexId}/entries/${formId}`, {})
 }

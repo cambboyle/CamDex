@@ -65,6 +65,20 @@ export class DexController {
     return this.dexService.getStats(user.sub, id);
   }
 
+  /** Check caught status for a set of form IDs in this dex.
+   *  GET /dex/:id/entries/check?formIds=uuid1,uuid2,...
+   *  Returns { [formId]: boolean }
+   */
+  @Get(':id/entries/check')
+  checkCaught(
+    @CurrentUser() user: SupabaseJwtPayload,
+    @Param('id') id: string,
+    @Query('formIds') formIds: string,
+  ) {
+    const ids = (formIds ?? '').split(',').filter(Boolean);
+    return this.dexService.checkCaught(user.sub, id, ids);
+  }
+
   @Post(':id/entries/:formId')
   @HttpCode(HttpStatus.NO_CONTENT)
   markCaught(

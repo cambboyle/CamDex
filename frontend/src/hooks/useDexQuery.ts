@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getDexes, createDex, updateDex, deleteDex,
-  getDexPage, getDexAll, getDexStats, markCaught, markUncaught,
+  getDexPage, getDexAll, getDexStats, checkCaught, markCaught, markUncaught,
 } from '@/api/dex'
 import type { CreateDexDto, UpdateDexDto } from '@/types/dex'
 
@@ -10,6 +10,7 @@ export const DEX_KEYS = {
   page: (id: string, page: number) => ['dex-page', id, page] as const,
   dexAll: (id: string) => ['dex-all', id] as const,
   stats: (id: string) => ['dex-stats', id] as const,
+  check: (id: string, formIds: string[]) => ['dex-check', id, ...formIds] as const,
 }
 
 export function useDexesQuery() {
@@ -43,6 +44,16 @@ export function useDexStatsQuery(id: string) {
     queryFn: () => getDexStats(id),
     enabled: !!id,
     staleTime: 30_000,
+  })
+}
+
+/** Check caught status for a list of form IDs across a single dex. */
+export function useDexCheckQuery(dexId: string, formIds: string[]) {
+  return useQuery({
+    queryKey: DEX_KEYS.check(dexId, formIds),
+    queryFn: () => checkCaught(dexId, formIds),
+    enabled: !!dexId && formIds.length > 0,
+    staleTime: 15_000,
   })
 }
 
@@ -82,6 +93,8 @@ export function useToggleCaught(dexId: string, page?: number) {
       void qc.invalidateQueries({ queryKey: DEX_KEYS.dexAll(dexId) })
       void qc.invalidateQueries({ queryKey: DEX_KEYS.stats(dexId) })
       void qc.invalidateQueries({ queryKey: DEX_KEYS.all })
+      // Invalidate any check queries for this dex so caught badges update
+      void qc.invalidateQueries({ queryKey: ['dex-check', dexId] })
     },
   })
 }

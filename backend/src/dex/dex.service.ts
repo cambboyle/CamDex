@@ -380,6 +380,24 @@ export class DexService {
     await this.entryRepo.delete({ dexId, formId });
   }
 
+  /** Return caught status for a batch of form IDs in one query. */
+  async checkCaught(
+    userId: string,
+    dexId: string,
+    formIds: string[],
+  ): Promise<Record<string, boolean>> {
+    await this.assertOwner(userId, dexId);
+    if (formIds.length === 0) return {};
+
+    const entries = await this.entryRepo.find({
+      where: formIds.map((formId) => ({ dexId, formId })),
+      select: ['formId'],
+    });
+
+    const caughtSet = new Set(entries.map((e) => e.formId));
+    return Object.fromEntries(formIds.map((id) => [id, caughtSet.has(id)]));
+  }
+
   // ── Helper ────────────────────────────────────────────────────────────────
 
   private async assertOwner(userId: string, dexId: string): Promise<Dex> {
