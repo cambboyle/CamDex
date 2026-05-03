@@ -5,7 +5,7 @@
  * are weak (×2 / ×4), neutral (×1), resistant (×½ / ×¼), or immune (×0).
  * Computed entirely from the team members' types — no network call needed.
  */
-import { ALL_TYPES, getDefensiveMultiplier } from '@/lib/typeMatchups'
+import { ALL_TYPES, getDefensiveMultiplier, computeCoverageScore } from '@/lib/typeMatchups'
 import type { PokemonType } from '@/lib/typeMatchups'
 import { TypeBadge } from '@/components/common/TypeBadge'
 import styles from './TeamTypeCoverage.module.css'
@@ -27,6 +27,14 @@ function scoreToBucket(m: number): 'immune' | 'resist' | 'neutral' | 'weak' | 'd
   return 'dblweak'
 }
 
+const GRADE_COLOURS: Record<string, string> = {
+  Excellent: '#16a34a',
+  Good:      '#4f46e5',
+  Average:   '#d97706',
+  Weak:      '#ea580c',
+  Vulnerable:'#dc2626',
+}
+
 export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
   const active = members.filter((m) => m.type1 !== null)
 
@@ -34,7 +42,41 @@ export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
     return <p className={styles.empty}>Add Pokémon to see type coverage.</p>
   }
 
+  const { score, grade, coveredTypes, vulnerableTypes } = computeCoverageScore(members)
+  const gradeColour = GRADE_COLOURS[grade] ?? '#6b7280'
+  const barColour = gradeColour
+
   return (
+    <>
+      {/* ── Coverage score card ── */}
+      <div className={styles.scoreCard}>
+        <div className={styles.scoreLeft}>
+          <span className={styles.scoreNum} style={{ color: gradeColour }}>{score}</span>
+          <span className={styles.scoreOutOf}>/100</span>
+          <span className={styles.scoreBadge} style={{ background: gradeColour }}>{grade}</span>
+        </div>
+        <div className={styles.scoreRight}>
+          <div className={styles.scoreBar}>
+            <div
+              className={styles.scoreBarFill}
+              style={{ width: `${score}%`, background: barColour }}
+            />
+          </div>
+          <div className={styles.scoreStats}>
+            <span className={styles.scoreStat}>
+              <span className={styles.scoreStatDot} style={{ background: '#16a34a' }} />
+              {coveredTypes} type{coveredTypes !== 1 ? 's' : ''} covered
+            </span>
+            {vulnerableTypes > 0 && (
+              <span className={styles.scoreStat}>
+                <span className={styles.scoreStatDot} style={{ background: '#dc2626' }} />
+                {vulnerableTypes} type{vulnerableTypes !== 1 ? 's' : ''} vulnerable
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
     <div className={styles.table}>
       <div className={styles.headerRow}>
         <div className={styles.typeCol} />
@@ -89,5 +131,6 @@ export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
         )
       })}
     </div>
+    </>
   )
 }
