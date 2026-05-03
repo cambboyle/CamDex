@@ -118,7 +118,7 @@ function dexSummary(dex: Dex): DexSummary {
  * - all forms incl. cosmetics (includeForms=true, includeCosmeticForms=true):
  *     no extra condition beyond is_battle_only = FALSE
  */
-function buildFormConditions(dex: Dex): string[] {
+export function buildFormConditions(dex: Dex): string[] {
   const conds: string[] = ['f.is_battle_only = FALSE'];
   if (!dex.includeForms) {
     conds.push('f.is_default = TRUE');
