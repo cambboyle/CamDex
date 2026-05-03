@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useCallback } from 'react'
 import { useDexAllQuery, useDexStatsQuery, useToggleCaught } from '@/hooks/useDexQuery'
 import { GAME_MAP, HOME_GAME } from '@/lib/gameConfig'
 import type { DexPageEntry } from '@/types/dex'
@@ -8,9 +9,10 @@ export const Route = createFileRoute('/_app/dex/$dexId')({
   component: DexBoxPage,
 })
 
-const BOX_SIZE = 30 // 6 cols × 5 rows — matches HOME layout
+const BOX_SIZE = 30
 
-/** Split an array into consecutive chunks of `size`. */
+type FilterMode = 'all' | 'caught' | 'uncaught'
+
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = []
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
@@ -21,28 +23,29 @@ function SlotSkeleton() {
   return <div className={styles.slotSkeleton} />
 }
 
-/** A single 6×5 box of Pokémon slots. */
 function Box({
   entries,
   boxIndex,
-  total,
+  totalEntries,
   isShiny,
   onToggle,
 }: {
   entries: (DexPageEntry | null)[]
   boxIndex: number
-  total: number
+  totalEntries: number
   isShiny: boolean
   onToggle: (formId: string, caught: boolean) => void
 }) {
   const start = boxIndex * BOX_SIZE + 1
-  const end = Math.min(start + entries.filter(Boolean).length - 1, total)
+  const end = Math.min(start + entries.filter(Boolean).length - 1, totalEntries)
 
   return (
-    <section className={styles.boxSection}>
+    <section id={`box-${boxIndex}`} className={styles.boxSection}>
       <div className={styles.boxHeader}>
         <span className={styles.boxLabel}>Box {boxIndex + 1}</span>
-        <span className={styles.boxRange}>#{start}–#{end}</span>
+        <span className={styles.boxRange}>
+          #{String(start).padStart(3, '0')}–#{String(end).padStart(3, '0')}
+        </span>
       </div>
       <div className={styles.box}>
         {entries.map((entry, i) => {
@@ -68,7 +71,7 @@ function Box({
                   className={styles.sprite}
                   loading="lazy"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none'
+                    ;(e.target as HTMLImageElement).style.display = 'none'
                   }}
                 />
               ) : (
@@ -91,32 +94,41 @@ function Box({
 
 function DexBoxPage() {
   const { dexId } = Route.useParams()
+  const [filter, setFilter] = useState<FilterMode>('all')
 
   const { data, isLoading, isError, error } = useDexAllQuery(dexId)
   const { data: stats } = useDexStatsQuery(dexId)
   const toggle = useToggleCaught(dexId)
 
   const dexInfo = data?.dex
-  const entries = data?.entries ?? []
+  const allEntries = data?.entries ?? []
 
-  const gameConfig = dexInfo?.game === 'home'
-    ? HOME_GAME
-    : (dexInfo?.game ? GAME_MAP[dexInfo.game] : null)
+  const gameConfig =
+    dexInfo?.game === 'home' ? HOME_GAME : dexInfo?.game ? GAME_MAP[dexInfo.game] : null
   const isShiny = dexInfo?.isShiny ?? false
 
-  // Split into boxes of 30; pad last box to full grid
-  const boxes = chunk(entries, BOX_SIZE).map((b) => {
+  // Apply filter: replace non-matching slots with null to preserve box positions
+  const filteredEntries = allEntries.map((e): DexPageEntry | null => {
+    if (filter === 'caught' && e.caughtAt === null) return null
+    if (filter === 'uncaught' && e.caughtAt !== null) return null
+    return e
+  })
+
+  const boxes = chunk(filteredEntries, BOX_SIZE).map((b) => {
     const padded: (DexPageEntry | null)[] = [...b]
     while (padded.length < BOX_SIZE) padded.push(null)
     return padded
   })
 
-  // While loading: show 3 placeholder box skeletons
   const skeletonBoxes = isLoading ? Array.from({ length: 3 }) : []
 
   const pct = stats?.completionPercent ?? 0
   const caught = stats?.caught ?? 0
   const total = stats?.total ?? 0
+
+  const jumpToBox = useCallback((boxIndex: number) => {
+    document.getElementById(`box-${boxIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
 
   return (
     <div className={styles.page}>
@@ -124,12 +136,12 @@ function DexBoxPage() {
       <div className={styles.stickyHeader}>
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <Link to="/dex/" className={styles.backLink}>← My Dexes</Link>
+            <Link to="/dex/" className={styles.backLink}>
+              ← My Dexes
+            </Link>
             <h1 className={styles.title}>{dexInfo?.name ?? '…'}</h1>
             <div className={styles.badges}>
-              {gameConfig && (
-                <span className={styles.gameBadge}>{gameConfig.shortLabel}</span>
-              )}
+              {gameConfig && <span className={styles.gameBadge}>{gameConfig.shortLabel}</span>}
               {isShiny && <span className={styles.shinyBadge}>✨ Shiny</span>}
               {dexInfo?.includeForms && (
                 <span className={styles.typeBadge}>
@@ -143,7 +155,9 @@ function DexBoxPage() {
             <svg width={70} height={70} aria-label={`${pct}% complete`}>
               <circle cx={35} cy={35} r={28} fill="none" stroke="#e5e7eb" strokeWidth={7} />
               <circle
-                cx={35} cy={35} r={28}
+                cx={35}
+                cy={35}
+                r={28}
                 fill="none"
                 stroke={isShiny ? '#f59e0b' : '#22c55e'}
                 strokeWidth={7}
@@ -153,11 +167,21 @@ function DexBoxPage() {
                 transform="rotate(-90 35 35)"
                 style={{ transition: 'stroke-dashoffset 0.6s ease' }}
               />
-              <text x={35} y={35} textAnchor="middle" dominantBaseline="middle" fontSize="0.72rem" fontWeight="700" fill="#1f2937">
+              <text
+                x={35}
+                y={35}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="0.72rem"
+                fontWeight="700"
+                fill="#1f2937"
+              >
                 {pct}%
               </text>
             </svg>
-            <div className={styles.countLabel}>{caught} / {total}</div>
+            <div className={styles.countLabel}>
+              {caught} / {total}
+            </div>
           </div>
         </div>
 
@@ -168,18 +192,54 @@ function DexBoxPage() {
             style={{ width: `${pct}%` }}
           />
         </div>
+
+        {/* ── Filter bar ── */}
+        <div className={styles.filterBar}>
+          <div className={styles.filterPills} role="group" aria-label="Filter Pokémon">
+            {(['all', 'caught', 'uncaught'] as const).map((mode) => (
+              <button
+                key={mode}
+                className={`${styles.pill} ${filter === mode ? styles.pillActive : ''}`}
+                onClick={() => setFilter(mode)}
+                aria-pressed={filter === mode}
+              >
+                {mode === 'all' ? 'All' : mode === 'caught' ? '✓ Caught' : '○ Uncaught'}
+              </button>
+            ))}
+          </div>
+
+          {boxes.length > 1 && (
+            <select
+              className={styles.jumpSelect}
+              defaultValue=""
+              onChange={(e) => {
+                const idx = parseInt(e.target.value, 10)
+                if (!isNaN(idx)) jumpToBox(idx)
+                e.target.value = ''
+              }}
+              aria-label="Jump to box"
+            >
+              <option value="" disabled>
+                Jump to box…
+              </option>
+              {boxes.map((_, bi) => (
+                <option key={bi} value={bi}>
+                  Box {bi + 1}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {/* ── Error state ── */}
       {isError && (
         <div className={styles.errorBox}>
           <p className={styles.errorTitle}>Could not load Pokémon</p>
-          <p className={styles.errorMsg}>
-            {(error as Error)?.message ?? 'Unknown error'}
-          </p>
+          <p className={styles.errorMsg}>{(error as Error)?.message ?? 'Unknown error'}</p>
           <p className={styles.errorHint}>
-            Make sure the backend is running and migrations have been applied
-            (<code>bun run migration:run</code>).
+            Make sure the backend is running and migrations have been applied (
+            <code>bun run migration:run</code>).
           </p>
         </div>
       )}
@@ -205,11 +265,9 @@ function DexBoxPage() {
                   key={bi}
                   entries={boxEntries}
                   boxIndex={bi}
-                  total={total}
+                  totalEntries={total}
                   isShiny={isShiny}
-                  onToggle={(formId, newCaught) =>
-                    toggle.mutate({ formId, caught: newCaught })
-                  }
+                  onToggle={(formId, newCaught) => toggle.mutate({ formId, caught: newCaught })}
                 />
               ))}
         </div>
