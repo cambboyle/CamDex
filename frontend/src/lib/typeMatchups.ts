@@ -40,3 +40,79 @@ export function getDefensiveMultiplier(
   const m2 = defType2 ? effectiveness[attackingType][defType2] : 1
   return m1 * m2
 }
+
+/** Convert a defensive multiplier to a signed coverage point value. */
+function multiplierPoints(m: number): number {
+  if (m === 0)    return  2    // immune — best possible
+  if (m === 0.25) return  1.5  // quarter damage
+  if (m === 0.5)  return  1    // resist
+  if (m === 1)    return  0    // neutral
+  if (m === 2)    return -1    // weak
+  return                 -2    // double weak (×4)
+}
+
+export interface CoverageScore {
+  /** 0–100 rounded integer. */
+  score: number
+  /** "Excellent" | "Good" | "Average" | "Weak" | "Vulnerable" */
+  grade: string
+  /** Number of types where the team's best response is resist or immune. */
+  coveredTypes: number
+  /** Number of types where multiple members are weak with no resists. */
+  vulnerableTypes: number
+}
+
+/**
+ * Compute a 0–100 defensive coverage score for a team.
+ *
+ * For each of the 18 attacking types:
+ *  - Every member scores points based on their defensive multiplier.
+ *  - Scores are normalized to [0, 1] accounting for team size.
+ * The overall score is the mean across all 18 types, scaled to 100.
+ */
+export function computeCoverageScore(
+  members: { type1: string | null; type2: string | null }[],
+): CoverageScore {
+  const active = members.filter((m) => m.type1 !== null)
+  if (active.length === 0) return { score: 0, grade: 'Vulnerable', coveredTypes: 0, vulnerableTypes: 0 }
+
+  const n = active.length
+  const maxPerType = n * 2   // all immune
+  const minPerType = n * -2  // all double-weak
+
+  let totalNorm = 0
+  let coveredTypes = 0
+  let vulnerableTypes = 0
+
+  for (const attacker of ALL_TYPES) {
+    const multipliers = active.map((m) =>
+      getDefensiveMultiplier(
+        attacker,
+        m.type1 as PokemonType,
+        m.type2 as PokemonType | null,
+      ),
+    )
+
+    const raw = multipliers.reduce((sum, m) => sum + multiplierPoints(m), 0)
+    const norm = (raw - minPerType) / (maxPerType - minPerType) // [0, 1]
+    totalNorm += norm
+
+    const bestMultiplier = Math.min(...multipliers)
+    const weakCount = multipliers.filter((m) => m > 1).length
+    const resistCount = multipliers.filter((m) => m < 1).length
+
+    if (bestMultiplier <= 0.5) coveredTypes++
+    if (weakCount >= Math.ceil(n / 2) && resistCount === 0) vulnerableTypes++
+  }
+
+  const score = Math.round((totalNorm / ALL_TYPES.length) * 100)
+
+  let grade: string
+  if (score >= 75) grade = 'Excellent'
+  else if (score >= 58) grade = 'Good'
+  else if (score >= 42) grade = 'Average'
+  else if (score >= 25) grade = 'Weak'
+  else grade = 'Vulnerable'
+
+  return { score, grade, coveredTypes, vulnerableTypes }
+}
