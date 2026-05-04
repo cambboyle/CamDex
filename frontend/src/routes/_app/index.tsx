@@ -124,7 +124,6 @@ function DexCard({ dex }: { dex: DexConfig }) {
 
 const QUICK_LINKS = [
   { to: '/pokedex/' as const, label: 'Pokédex', desc: 'Browse all species and forms' },
-  { to: '/boxes/' as const, label: 'PC Boxes', desc: 'Organise your caught Pokémon' },
   { to: '/teams/' as const, label: 'Teams', desc: 'Build competitive teams' },
 ] as const
 

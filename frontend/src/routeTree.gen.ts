@@ -15,7 +15,6 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppPokedexIndexRouteImport } from './routes/_app/pokedex/index'
 import { Route as AppDexIndexRouteImport } from './routes/_app/dex/index'
-import { Route as AppBoxesIndexRouteImport } from './routes/_app/boxes/index'
 import { Route as AppTeamsTeamIdRouteImport } from './routes/_app/teams/$teamId'
 import { Route as AppPokedexSpeciesIdRouteImport } from './routes/_app/pokedex/$speciesId'
 import { Route as AppDexDexIdRouteImport } from './routes/_app/dex/$dexId'
@@ -49,11 +48,6 @@ const AppDexIndexRoute = AppDexIndexRouteImport.update({
   path: '/dex/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppBoxesIndexRoute = AppBoxesIndexRouteImport.update({
-  id: '/boxes/',
-  path: '/boxes/',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppTeamsTeamIdRoute = AppTeamsTeamIdRouteImport.update({
   id: '/teams/$teamId',
   path: '/teams/$teamId',
@@ -76,7 +70,6 @@ export interface FileRoutesByFullPath {
   '/dex/$dexId': typeof AppDexDexIdRoute
   '/pokedex/$speciesId': typeof AppPokedexSpeciesIdRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRoute
-  '/boxes/': typeof AppBoxesIndexRoute
   '/dex/': typeof AppDexIndexRoute
   '/pokedex/': typeof AppPokedexIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
@@ -87,7 +80,6 @@ export interface FileRoutesByTo {
   '/dex/$dexId': typeof AppDexDexIdRoute
   '/pokedex/$speciesId': typeof AppPokedexSpeciesIdRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRoute
-  '/boxes': typeof AppBoxesIndexRoute
   '/dex': typeof AppDexIndexRoute
   '/pokedex': typeof AppPokedexIndexRoute
   '/teams': typeof AppTeamsIndexRoute
@@ -100,7 +92,6 @@ export interface FileRoutesById {
   '/_app/dex/$dexId': typeof AppDexDexIdRoute
   '/_app/pokedex/$speciesId': typeof AppPokedexSpeciesIdRoute
   '/_app/teams/$teamId': typeof AppTeamsTeamIdRoute
-  '/_app/boxes/': typeof AppBoxesIndexRoute
   '/_app/dex/': typeof AppDexIndexRoute
   '/_app/pokedex/': typeof AppPokedexIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
@@ -113,7 +104,6 @@ export interface FileRouteTypes {
     | '/dex/$dexId'
     | '/pokedex/$speciesId'
     | '/teams/$teamId'
-    | '/boxes/'
     | '/dex/'
     | '/pokedex/'
     | '/teams/'
@@ -124,7 +114,6 @@ export interface FileRouteTypes {
     | '/dex/$dexId'
     | '/pokedex/$speciesId'
     | '/teams/$teamId'
-    | '/boxes'
     | '/dex'
     | '/pokedex'
     | '/teams'
@@ -136,7 +125,6 @@ export interface FileRouteTypes {
     | '/_app/dex/$dexId'
     | '/_app/pokedex/$speciesId'
     | '/_app/teams/$teamId'
-    | '/_app/boxes/'
     | '/_app/dex/'
     | '/_app/pokedex/'
     | '/_app/teams/'
@@ -191,13 +179,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDexIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/boxes/': {
-      id: '/_app/boxes/'
-      path: '/boxes'
-      fullPath: '/boxes/'
-      preLoaderRoute: typeof AppBoxesIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/teams/$teamId': {
       id: '/_app/teams/$teamId'
       path: '/teams/$teamId'
@@ -227,7 +208,6 @@ interface AppRouteChildren {
   AppDexDexIdRoute: typeof AppDexDexIdRoute
   AppPokedexSpeciesIdRoute: typeof AppPokedexSpeciesIdRoute
   AppTeamsTeamIdRoute: typeof AppTeamsTeamIdRoute
-  AppBoxesIndexRoute: typeof AppBoxesIndexRoute
   AppDexIndexRoute: typeof AppDexIndexRoute
   AppPokedexIndexRoute: typeof AppPokedexIndexRoute
   AppTeamsIndexRoute: typeof AppTeamsIndexRoute
@@ -238,7 +218,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppDexDexIdRoute: AppDexDexIdRoute,
   AppPokedexSpeciesIdRoute: AppPokedexSpeciesIdRoute,
   AppTeamsTeamIdRoute: AppTeamsTeamIdRoute,
-  AppBoxesIndexRoute: AppBoxesIndexRoute,
   AppDexIndexRoute: AppDexIndexRoute,
   AppPokedexIndexRoute: AppPokedexIndexRoute,
   AppTeamsIndexRoute: AppTeamsIndexRoute,
