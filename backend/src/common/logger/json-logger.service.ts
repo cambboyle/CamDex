@@ -29,7 +29,13 @@ export class JsonLoggerService implements LoggerService {
 
     // Ship to BetterStack asynchronously — never blocks the request
     if (this.logtail) {
-      const { level, message, timestamp: _ts, ...meta } = entry;
+      // Strip logger-internal fields — Logtail adds its own timestamp
+      const logtailMeta = { ...entry } as Record<string, unknown>;
+      delete logtailMeta['level'];
+      delete logtailMeta['message'];
+      delete logtailMeta['timestamp'];
+      const { level, message } = entry;
+      const meta = logtailMeta;
       switch (level) {
         case 'error':
           void this.logtail.error(message, meta);
