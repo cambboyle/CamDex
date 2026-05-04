@@ -1,30 +1,21 @@
-# ---- Stage 1: Build ----
-FROM oven/bun:1 AS builder
+FROM oven/bun:1
 
 WORKDIR /app
 
-# Install ALL deps (including devDeps — needed for @nestjs/cli)
+# Install ALL deps — devDeps are required for @nestjs/cli (nest build)
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Copy source and compile
 COPY . .
-RUN bun run build
 
-# ---- Stage 2: Production runtime ----
-FROM oven/bun:1 AS runner
+# Compile TypeScript → JavaScript using the local nest binary
+RUN ./node_modules/.bin/nest build
 
-WORKDIR /app
+# Fail the build loudly if the compiled entry-point is missing
+RUN test -f dist/main.js || (echo "ERROR: dist/main.js not found after build" && exit 1)
 
 ENV NODE_ENV=production
-
-# Copy compiled output from builder
-COPY --from=builder /app/dist ./dist
-
-# Install production-only deps
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
-
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+# Use bun runtime — handles both CJS and ESM output transparently
+CMD ["bun", "dist/main.js"]
