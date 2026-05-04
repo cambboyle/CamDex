@@ -27,8 +27,8 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(logger));
 
   const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  logger.log(`Backend running on http://localhost:${port}`, 'Bootstrap');
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Backend running on http://0.0.0.0:${port}`, 'Bootstrap');
 }
 
 void bootstrap();
