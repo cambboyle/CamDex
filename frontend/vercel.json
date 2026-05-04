@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://camdex-production.up.railway.app/:path*"
+      "destination": "https://camdex-production-7cc4.up.railway.app/:path*"
     },
     {
       "source": "/(.*)",
