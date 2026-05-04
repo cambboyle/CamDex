@@ -268,7 +268,7 @@
   width: 68%;
   height: 68%;
   object-fit: contain;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .spriteNo {
