@@ -1,8 +1,6 @@
 [build]
-builder = "RAILPACK"
-buildCommand = "NODE_ENV=development bun install --frozen-lockfile && bun run build"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "bun run start:prod"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
