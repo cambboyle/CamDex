@@ -1,8 +1,6 @@
 [build]
-builder = "nixpacks"
-buildCommand = "bun install --frozen-lockfile && bun run build"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "bun run start:prod"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
