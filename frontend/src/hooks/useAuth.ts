@@ -24,8 +24,8 @@ export function useAuth(): AuthState & { signOut: () => Promise<void> } {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setState({ session, user: session?.user ?? null, loading: false })
       if (session) {
-        // Sync user profile to backend on login
-        api.post('/auth/sync', {}).catch(console.error)
+        // Sync user profile to backend on login — fire-and-forget, non-critical
+        api.post('/auth/sync', {}).catch(() => {})
       }
     })
 

@@ -83,3 +83,33 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.toggle {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.toggleBtn:hover { color: #4338ca; }
+
+.success {
+  font-size: 0.85rem;
+  color: #16a34a;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+}
