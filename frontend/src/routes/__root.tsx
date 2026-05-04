@@ -1,4 +1,5 @@
 import { createRootRoute, Outlet, Link } from '@tanstack/react-router'
+import { Analytics } from '@vercel/analytics/react'
 import { RouteError } from '@/components/common/RouteError'
 
 function NotFound() {
@@ -23,7 +24,12 @@ function NotFound() {
 }
 
 export const Route = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <>
+      <Outlet />
+      <Analytics />
+    </>
+  ),
   errorComponent: ({ error }) => <RouteError error={error} />,
   notFoundComponent: NotFound,
 })
