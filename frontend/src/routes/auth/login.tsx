@@ -10,26 +10,52 @@ export const Route = createFileRoute('/auth/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleLogin(e: React.FormEvent) {
+  function reset() {
+    setError(null)
+    setSuccess(null)
+    setEmail('')
+    setPassword('')
+  }
+
+  function toggleMode() {
+    setMode((m) => (m === 'signin' ? 'signup' : 'signin'))
+    reset()
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
+    if (mode === 'signin') {
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+      if (authError) {
+        setError(authError.message)
+        setLoading(false)
+        return
+      }
+      await api.post('/auth/sync', {}).catch(() => {})
+      await navigate({ to: '/' })
+    } else {
+      const { error: authError } = await supabase.auth.signUp({ email, password })
+      if (authError) {
+        setError(authError.message)
+        setLoading(false)
+        return
+      }
+      setSuccess('Account created! Check your email to confirm your address, then sign in.')
+      setMode('signin')
+      setPassword('')
     }
 
-    // Sync user profile to backend
-    await api.post('/auth/sync', {}).catch(() => {})
-    await navigate({ to: '/' })
     setLoading(false)
   }
 
@@ -37,8 +63,11 @@ function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>CamDex</h1>
-        <p className={styles.subtitle}>Sign in to your collection</p>
-        <form onSubmit={handleLogin} className={styles.form}>
+        <p className={styles.subtitle}>
+          {mode === 'signin' ? 'Sign in to your collection' : 'Create your account'}
+        </p>
+
+        <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.label}>
             Email
             <input
@@ -57,15 +86,28 @@ function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+              minLength={mode === 'signup' ? 6 : undefined}
               required
             />
           </label>
+
           {error && <p className={styles.error} role="alert">{error}</p>}
+          {success && <p className={styles.success} role="status">{success}</p>}
+
           <button className={styles.button} type="submit" disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading
+              ? mode === 'signin' ? 'Signing in…' : 'Creating account…'
+              : mode === 'signin' ? 'Sign in' : 'Create account'}
           </button>
         </form>
+
+        <div className={styles.toggle}>
+          {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+          <button className={styles.toggleBtn} onClick={toggleMode} type="button">
+            {mode === 'signin' ? 'Sign up' : 'Sign in'}
+          </button>
+        </div>
       </div>
     </div>
   )

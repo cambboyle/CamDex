@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ export interface SupabaseJwtPayload {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate, OnModuleInit {
+  private readonly logger = new Logger(JwtAuthGuard.name);
   private readonly supabaseUrl: string;
   private readonly jwtSecret: string;
   private publicKeys: KeyObject[] = [];
@@ -46,13 +48,10 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
       this.publicKeys = body.keys.map((jwk) =>
         createPublicKey({ key: jwk, format: 'jwk' }),
       );
-      console.log(
-        `[JwtAuthGuard] Loaded ${this.publicKeys.length} public key(s) from JWKS`,
-      );
+      this.logger.log(`Loaded ${this.publicKeys.length} public key(s) from JWKS`);
     } catch (err) {
-      console.warn(
-        '[JwtAuthGuard] Failed to load JWKS, falling back to symmetric secret:',
-        err,
+      this.logger.warn(
+        `Failed to load JWKS, falling back to symmetric secret: ${String(err)}`,
       );
     }
   }
