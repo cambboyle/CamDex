@@ -1,6 +1,9 @@
 import { createRootRoute, Outlet, Link } from '@tanstack/react-router'
 import { Analytics } from '@vercel/analytics/react'
 import { RouteError } from '@/components/common/RouteError'
+import { setupGlobalErrorTracking } from '@/lib/logger'
+
+setupGlobalErrorTracking()
 
 function NotFound() {
   return (
