@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useSpeciesDetailQuery } from '@/hooks/usePokedexQuery'
+import { useDexesQuery, useDexCheckQuery, useToggleCaught } from '@/hooks/useDexQuery'
 import { TypeBadge } from '@/components/common/TypeBadge'
 import { StatBar } from '@/components/common/StatBar'
 import { PokemonSprite } from '@/components/common/PokemonSprite'
 import { TypeMatchupChart } from '@/components/pokedex/TypeMatchupChart'
 import type { PokemonForm } from '@/types/pokemon'
+import type { DexConfig } from '@/types/dex'
 import styles from './$speciesId.module.css'
 
 export const Route = createFileRoute('/_app/pokedex/$speciesId')({
@@ -46,6 +48,41 @@ const VERSION_LABELS: Record<string, string> = {
 
 function formatVersion(slug: string): string {
   return VERSION_LABELS[slug] ?? slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// ── Dex status panel ──────────────────────────────────────────────────────────
+
+function DexStatusRow({ dex, forms }: { dex: DexConfig; forms: PokemonForm[] }) {
+  const formIds = forms.map((f) => f.id)
+  const { data: status } = useDexCheckQuery(dex.id, formIds)
+  const toggle = useToggleCaught(dex.id)
+
+  return (
+    <div className={styles.dexRow}>
+      <div className={styles.dexRowMeta}>
+        <Link to="/dex/$dexId" params={{ dexId: dex.id }} className={styles.dexRowName}>
+          {dex.name}
+        </Link>
+        {dex.isShiny && <span className={styles.shinyPip}>✨</span>}
+      </div>
+      <div className={styles.dexRowForms}>
+        {forms.map((form) => {
+          const caught = status?.[form.id] ?? false
+          return (
+            <button
+              key={form.id}
+              className={`${styles.formPill} ${caught ? styles.formPillCaught : ''}`}
+              onClick={() => toggle.mutate({ formId: form.id, caught: !caught })}
+              aria-pressed={caught}
+              aria-label={`${caught ? 'Unmark' : 'Mark'} ${form.displayName} as caught in ${dex.name}`}
+            >
+              {caught ? '✓' : '○'} {forms.length > 1 ? form.displayName : 'Caught'}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function SpeciesDetailPage() {
@@ -182,6 +219,27 @@ function SpeciesDetailPage() {
             </div>
           </div>
 
+          {/* Dex Status */}
+          <DexStatusSection forms={species.forms} />
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DexStatusSection({ forms }: { forms: PokemonForm[] }) {
+  const { data: dexes } = useDexesQuery()
+  if (!dexes || dexes.length === 0) return null
+
+  return (
+    <div className={styles.section}>
+      <h2 className={styles.sectionTitle}>Your Dexes</h2>
+      <div className={styles.sectionBody}>
+        <div className={styles.dexStatusList}>
+          {dexes.map((dex) => (
+            <DexStatusRow key={dex.id} dex={dex} forms={forms} />
+          ))}
         </div>
       </div>
     </div>

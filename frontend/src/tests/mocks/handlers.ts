@@ -71,4 +71,13 @@ export const handlers = [
   http.delete('/api/dex/:dexId/entries/:formId', () =>
     new HttpResponse(null, { status: 204 }),
   ),
+
+  // Check caught status for a batch of form IDs
+  // First form ID in the list is returned as caught, the rest as uncaught.
+  http.get('/api/dex/:dexId/entries/check', ({ request }) => {
+    const url = new URL(request.url)
+    const formIds = (url.searchParams.get('formIds') ?? '').split(',').filter(Boolean)
+    const result = Object.fromEntries(formIds.map((id, i) => [id, i === 0]))
+    return HttpResponse.json(result)
+  }),
 ]

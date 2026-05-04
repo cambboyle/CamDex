@@ -69,6 +69,7 @@ describe('DexService', () => {
   const mockEntryRepo = {
     createQueryBuilder: jest.fn(),
     delete: jest.fn(),
+    find: jest.fn(),
   };
 
   const mockDataSource = {
@@ -214,6 +215,85 @@ describe('DexService', () => {
       const result = await service.getStats('user-1', 'dex-1');
 
       expect(result.completionPercent).toBe(0);
+    });
+  });
+
+  // ── checkCaught ───────────────────────────────────────────────────────────────
+
+  describe('checkCaught', () => {
+    it('returns an empty object when formIds array is empty', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex());
+
+      const result = await service.checkCaught('user-1', 'dex-1', []);
+      expect(result).toEqual({});
+      expect(mockEntryRepo.find).not.toHaveBeenCalled();
+    });
+
+    it('returns true for caught forms and false for uncaught forms', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex());
+      // Only form-a is in the dex entries
+      mockEntryRepo.find.mockResolvedValue([{ formId: 'form-a' }]);
+
+      const result = await service.checkCaught('user-1', 'dex-1', [
+        'form-a',
+        'form-b',
+        'form-c',
+      ]);
+
+      expect(result).toEqual({
+        'form-a': true,
+        'form-b': false,
+        'form-c': false,
+      });
+    });
+
+    it('returns all true when every form is caught', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex());
+      mockEntryRepo.find.mockResolvedValue([
+        { formId: 'form-a' },
+        { formId: 'form-b' },
+      ]);
+
+      const result = await service.checkCaught('user-1', 'dex-1', [
+        'form-a',
+        'form-b',
+      ]);
+
+      expect(result).toEqual({ 'form-a': true, 'form-b': true });
+    });
+
+    it('returns all false when no forms are caught', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex());
+      mockEntryRepo.find.mockResolvedValue([]);
+
+      const result = await service.checkCaught('user-1', 'dex-1', [
+        'form-x',
+        'form-y',
+      ]);
+
+      expect(result).toEqual({ 'form-x': false, 'form-y': false });
+    });
+
+    it('queries with all provided formId conditions', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex());
+      mockEntryRepo.find.mockResolvedValue([]);
+
+      await service.checkCaught('user-1', 'dex-1', ['form-a', 'form-b']);
+
+      expect(mockEntryRepo.find).toHaveBeenCalledWith({
+        where: [
+          { dexId: 'dex-1', formId: 'form-a' },
+          { dexId: 'dex-1', formId: 'form-b' },
+        ],
+        select: ['formId'],
+      });
+    });
+
+    it('throws ForbiddenException for a dex owned by another user', async () => {
+      mockDexRepo.findOne.mockResolvedValue(makeDex({ userId: 'other-user' }));
+      await expect(
+        service.checkCaught('user-1', 'dex-1', ['form-a']),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

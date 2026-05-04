@@ -60,7 +60,7 @@ Tech stack (short):
 ### Naming
 
 - Files & React components: PascalCase (e.g. `PokemonCard.tsx`).
-- Hooks: `use` prefix + camelCase (e.g. `useLivingDexQuery`).
+- Hooks: `use` prefix + camelCase (e.g. `useDexesQuery`, `useToggleCaught`).
 - Services / classes: PascalCase, file `pokemon.service.ts`.
 - DTOs: suffix with `Dto` (e.g. `CreateUserPokemonDto`).
 - Variables / functions: camelCase. Constants: UPPER_SNAKE (global-only) or PascalCase for exported enums.
@@ -69,10 +69,10 @@ Tech stack (short):
 
 - Components: function components using hooks; split presentational vs container logic.
 - Use TanStack Query for remote/server state; keep local UI state minimal.
-- Query keys: descriptive arrays — `['pokedex']`, `['species', speciesId]`, `['livingDex']`, `['boxes']`, `['box', boxId]`, `['teams']`, `['team', teamId]`.
+- Query keys: use the `*_KEYS` constants defined in each hook file (e.g. `DEX_KEYS`, `BOX_KEYS`, `TEAM_KEYS`). Avoid bare string arrays. Current namespaces: `['dexes']`, `['dex-all', id]`, `['dex-stats', id]`, `['pokedex']`, `['species', id]`, `['boxes']`, `['box-slots', id]`, `['teams']`, `['team', id]`.
 - CSS Modules: name `ComponentName.module.css`, import as `import styles from './ComponentName.module.css'`.
-- Keep class names semantic: `livingDexGrid`, `formCell`, `boxSlot`, `typeBadge`.
-- Use `@tanstack/react-virtual` for lists/grids with more than ~200 items (the living dex has ~1800 form cells).
+- Keep class names semantic: `dexCard`, `formCell`, `boxSlot`, `typeBadge`.
+- Use `@tanstack/react-virtual` for lists/grids with more than ~200 items.
 
 ### Backend / NestJS-specific
 
@@ -102,7 +102,9 @@ Tech stack (short):
 
 ### Developer workflow & commits
 
-- Commit style: Conventional Commits (e.g. `feat: add living dex grid`, `fix: prevent duplicate catches`).
+- Branch strategy: `main` (production) ← `develop` (integration) ← `feat/*`, `fix/*`, `chore/*`, `test/*`, `docs/*`. See `CONTRIBUTING.md` for the full workflow.
+- Always branch from `develop`; open PRs into `develop`; only `develop → main` PRs constitute a release.
+- Commit style: Conventional Commits (e.g. `feat(dex): add filter bar`, `fix(teams): cap SwSh at dex #898`).
 - When changing architecture (tsconfig, ESLint, Vitest config), include a short rationale in the PR description and update this AGENTS.md.
 
 ## CI / automation notes

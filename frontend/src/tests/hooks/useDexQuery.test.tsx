@@ -6,6 +6,7 @@ import { describe, it, expect, vi } from 'vitest'
 import {
   useDexesQuery,
   useDexAllQuery,
+  useDexCheckQuery,
   useCreateDex,
   useDeleteDex,
   useToggleCaught,
@@ -169,5 +170,82 @@ describe('useToggleCaught', () => {
     expect(invalidateSpy).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: DEX_KEYS.all }),
     )
+  })
+
+  it('also invalidates dex-check queries for the dex on success', async () => {
+    const { queryClient, Wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+    const { result } = renderHook(() => useToggleCaught(MOCK_DEX_ID), { wrapper: Wrapper })
+    result.current.mutate({ formId: MOCK_FORM_ID, caught: true })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(invalidateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ['dex-check', MOCK_DEX_ID] }),
+    )
+  })
+})
+
+// ── useDexCheckQuery ──────────────────────────────────────────────────────────
+
+const MOCK_FORM_ID_2 = 'form-00000000-0000-0000-0000-000000000002'
+const MOCK_FORM_ID_3 = 'form-00000000-0000-0000-0000-000000000003'
+
+describe('useDexCheckQuery', () => {
+  it('fetches caught status for a list of form IDs', async () => {
+    const { Wrapper } = makeWrapper()
+    const formIds = [MOCK_FORM_ID, MOCK_FORM_ID_2, MOCK_FORM_ID_3]
+    const { result } = renderHook(
+      () => useDexCheckQuery(MOCK_DEX_ID, formIds),
+      { wrapper: Wrapper },
+    )
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    // Mock handler returns first ID as caught, rest as uncaught
+    expect(result.current.data).toEqual({
+      [MOCK_FORM_ID]: true,
+      [MOCK_FORM_ID_2]: false,
+      [MOCK_FORM_ID_3]: false,
+    })
+  })
+
+  it('stays idle when dexId is an empty string', () => {
+    const { Wrapper } = makeWrapper()
+    const { result } = renderHook(
+      () => useDexCheckQuery('', [MOCK_FORM_ID]),
+      { wrapper: Wrapper },
+    )
+
+    expect(result.current.fetchStatus).toBe('idle')
+    expect(result.current.data).toBeUndefined()
+  })
+
+  it('stays idle when formIds array is empty', () => {
+    const { Wrapper } = makeWrapper()
+    const { result } = renderHook(
+      () => useDexCheckQuery(MOCK_DEX_ID, []),
+      { wrapper: Wrapper },
+    )
+
+    expect(result.current.fetchStatus).toBe('idle')
+    expect(result.current.data).toBeUndefined()
+  })
+
+  it('surfaces an error when the server returns 500', async () => {
+    server.use(
+      http.get(`/api/dex/${MOCK_DEX_ID}/entries/check`, () =>
+        HttpResponse.json({ message: 'Server Error' }, { status: 500 }),
+      ),
+    )
+
+    const { Wrapper } = makeWrapper()
+    const { result } = renderHook(
+      () => useDexCheckQuery(MOCK_DEX_ID, [MOCK_FORM_ID]),
+      { wrapper: Wrapper },
+    )
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
   })
 })
