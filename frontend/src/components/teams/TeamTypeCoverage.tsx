@@ -5,6 +5,7 @@
  * are weak (×2 / ×4), neutral (×1), resistant (×½ / ×¼), or immune (×0).
  * Computed entirely from the team members' types — no network call needed.
  */
+import { useState } from 'react'
 import { ALL_TYPES, getDefensiveMultiplier, computeCoverageScore } from '@/lib/typeMatchups'
 import type { PokemonType } from '@/lib/typeMatchups'
 import { TypeBadge } from '@/components/common/TypeBadge'
@@ -37,6 +38,7 @@ const GRADE_COLOURS: Record<string, string> = {
 
 export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
   const active = members.filter((m) => m.type1 !== null)
+  const [showInfo, setShowInfo] = useState(false)
 
   if (active.length === 0) {
     return <p className={styles.empty}>Add Pokémon to see type coverage.</p>
@@ -44,7 +46,6 @@ export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
 
   const { score, grade, coveredTypes, vulnerableTypes } = computeCoverageScore(members)
   const gradeColour = GRADE_COLOURS[grade] ?? '#6b7280'
-  const barColour = gradeColour
 
   return (
     <>
@@ -59,7 +60,7 @@ export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
           <div className={styles.scoreBar}>
             <div
               className={styles.scoreBarFill}
-              style={{ width: `${score}%`, background: barColour }}
+              style={{ width: `${score}%`, background: gradeColour }}
             />
           </div>
           <div className={styles.scoreStats}>
@@ -75,7 +76,50 @@ export function TeamTypeCoverage({ members }: TeamTypeCoverageProps) {
             )}
           </div>
         </div>
+        <button
+          className={styles.infoBtn}
+          onClick={() => setShowInfo((v) => !v)}
+          aria-expanded={showInfo}
+          aria-label="How is this score calculated?"
+          title="How is this calculated?"
+        >
+          ?
+        </button>
       </div>
+
+      {/* ── Scoring explanation panel ── */}
+      {showInfo && (
+        <div className={styles.infoPanel}>
+          <button className={styles.infoPanelClose} onClick={() => setShowInfo(false)} aria-label="Close">✕</button>
+          <h4 className={styles.infoPanelTitle}>How the score is calculated</h4>
+          <p className={styles.infoPanelText}>
+            For each of the <strong>18 attack types</strong>, every team member earns points based on how well their typing handles that attack:
+          </p>
+          <table className={styles.infoPanelTable}>
+            <tbody>
+              <tr><td className={styles.infoCellImm}>Immune ×0</td><td>+2 pts</td></tr>
+              <tr><td className={styles.infoCellRes}>Quarter resist ×¼</td><td>+1.5 pts</td></tr>
+              <tr><td className={styles.infoCellRes}>Resist ×½</td><td>+1 pt</td></tr>
+              <tr><td className={styles.infoCellNeu}>Neutral ×1</td><td>0 pts</td></tr>
+              <tr><td className={styles.infoCellWk}>Weak ×2</td><td>−1 pt</td></tr>
+              <tr><td className={styles.infoCellDbl}>Double weak ×4</td><td>−2 pts</td></tr>
+            </tbody>
+          </table>
+          <p className={styles.infoPanelText}>
+            Each type's raw points are normalised against the theoretical best and worst your team could score, giving a value between 0 and 1. The <strong>final score</strong> is the average across all 18 types, multiplied by 100.
+          </p>
+          <p className={styles.infoPanelText}>
+            A type is <strong>covered</strong> if at least one member resists or is immune to it. A type is <strong>vulnerable</strong> if the majority of your team is weak to it with no members resisting.
+          </p>
+          <div className={styles.infoPanelGrades}>
+            <span style={{ color: '#16a34a' }}>■</span> Excellent (75+) &nbsp;
+            <span style={{ color: '#4f46e5' }}>■</span> Good (58+) &nbsp;
+            <span style={{ color: '#d97706' }}>■</span> Average (42+) &nbsp;
+            <span style={{ color: '#ea580c' }}>■</span> Weak (25+) &nbsp;
+            <span style={{ color: '#dc2626' }}>■</span> Vulnerable
+          </div>
+        </div>
+      )}
 
     <div className={styles.table}>
       <div className={styles.headerRow}>
