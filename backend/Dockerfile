@@ -8,8 +8,11 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-# Compile TypeScript → JavaScript using the local nest binary
-RUN ./node_modules/.bin/nest build
+# Compile TypeScript directly — bypasses nest CLI to get clear error output
+RUN ./node_modules/.bin/tsc -p tsconfig.build.json --listEmittedFiles
+
+# Show what was actually produced
+RUN find dist -type f 2>/dev/null || echo "dist/ is empty or missing"
 
 # Fail the build loudly if the compiled entry-point is missing
 RUN test -f dist/main.js || (echo "ERROR: dist/main.js not found after build" && exit 1)
