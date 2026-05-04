@@ -27,11 +27,8 @@ jobs:
         working-directory: frontend
         run: bun run build
         env:
-          # Expose the public env vars Vite needs at build time.
-          # Add your actual values in GitHub → Settings → Secrets → Actions.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy to Vercel
         working-directory: frontend
