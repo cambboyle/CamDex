@@ -1,3 +1,5 @@
+[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v1/monitor/2ljl1.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
+
 # CamDex
 
 A personal Pokémon collection tracker built for one player. Track every obtainable form across a HOME-style living dex, build competitive teams with full EV/SP validation, and browse the full Pokédex — all backed by a live PostgreSQL database seeded from PokéAPI.
