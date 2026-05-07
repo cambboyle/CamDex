@@ -4,6 +4,7 @@ import { http, HttpResponse } from 'msw'
 
 export const MOCK_DEX_ID = 'dex-00000000-0000-0000-0000-000000000001'
 export const MOCK_FORM_ID = 'form-00000000-0000-0000-0000-000000000001'
+export const MOCK_TEAM_ID = 'team-00000000-0000-0000-0000-000000000001'
 
 const mockDexSummary = {
   id: MOCK_DEX_ID,
@@ -36,9 +37,54 @@ const mockEntry = {
   caughtAt: null,
 }
 
+const mockSpecies = {
+  id: 'species-1',
+  nationalDexNumber: 1,
+  name: 'bulbasaur',
+  displayName: 'Bulbasaur',
+  generation: 1,
+  isLegendary: false,
+  isMythical: false,
+  isBaby: false,
+  type1: 'grass',
+  type2: 'poison',
+}
+
+const mockTeam = {
+  id: MOCK_TEAM_ID,
+  userId: 'user-1',
+  name: 'My Team',
+  game: 'scarlet-violet',
+  format: 'vgc-2025',
+  notes: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+}
+
+const mockMember = {
+  id: 'member-1',
+  teamId: MOCK_TEAM_ID,
+  slot: 1,
+  userPokemonId: null,
+  heldItem: null,
+  move1: null,
+  move2: null,
+  move3: null,
+  move4: null,
+  teraType: null,
+  evHp: 0,
+  evAtk: 0,
+  evDef: 0,
+  evSpa: 0,
+  evSpd: 0,
+  evSpe: 0,
+}
+
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 export const handlers = [
+  // ── Dex ───────────────────────────────────────────────────────────────────
+
   // List dexes
   http.get('/api/dex', () => HttpResponse.json([mockDexConfig])),
 
@@ -80,4 +126,44 @@ export const handlers = [
     const result = Object.fromEntries(formIds.map((id, i) => [id, i === 0]))
     return HttpResponse.json(result)
   }),
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+
+  http.get('/api/auth/me', () =>
+    HttpResponse.json({ id: 'user-1', email: 'test@example.com' }),
+  ),
+
+  // ── Pokemon ───────────────────────────────────────────────────────────────
+
+  http.get('/api/pokemon/species', () =>
+    HttpResponse.json({ data: [mockSpecies], total: 1, page: 1, limit: 20 }),
+  ),
+
+  // ── Teams ─────────────────────────────────────────────────────────────────
+
+  // List teams
+  http.get('/api/teams', () => HttpResponse.json([mockTeam])),
+
+  // Create team
+  http.post('/api/teams', () => HttpResponse.json(mockTeam, { status: 201 })),
+
+  // Get team by id
+  http.get('/api/teams/:id', () => HttpResponse.json(mockTeam)),
+
+  // Update team
+  http.patch('/api/teams/:id', () => HttpResponse.json(mockTeam)),
+
+  // Delete team
+  http.delete('/api/teams/:id', () => new HttpResponse(null, { status: 204 })),
+
+  // Get team members
+  http.get('/api/teams/:id/members', () => HttpResponse.json([mockMember])),
+
+  // Upsert team member at slot
+  http.put('/api/teams/:id/members/:slot', () => HttpResponse.json(mockMember)),
+
+  // Remove team member at slot
+  http.delete('/api/teams/:id/members/:slot', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
 ]
