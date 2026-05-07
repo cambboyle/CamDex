@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(bun run *)",
+      "Bash(git push *)",
+      "Bash(git config *)",
+      "Bash(xargs ls -la)",
+      "Bash(rm -rf \"/Users/cambboyle/Documents/PARA System/01 - Projects/Projects/CamDex/backend/src/box\")",
+      "Bash(npm uninstall *)",
+      "Bash(bun remove *)"
+    ]
+  }
+}

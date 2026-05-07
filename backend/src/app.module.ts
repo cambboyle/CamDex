@@ -8,7 +8,6 @@ import { JwtAuthGuard } from './auth/auth.guard';
 import { UserModule } from './user/user.module';
 import { PokemonModule } from './pokemon/pokemon.module';
 import { CollectionModule } from './collection/collection.module';
-import { BoxModule } from './box/box.module';
 import { TeamModule } from './team/team.module';
 import { DexModule } from './dex/dex.module';
 
@@ -23,7 +22,6 @@ import { DexModule } from './dex/dex.module';
     UserModule,
     PokemonModule,
     CollectionModule,
-    BoxModule,
     TeamModule,
     DexModule,
   ],
