@@ -14,13 +14,13 @@ interface AuthedRequest extends Request {
 }
 
 /**
- * Global interceptor that emits two JSON log lines per HTTP request:
- *   → GET /dex/abc/all  (userId: user-123)
- *   ← 200 GET /dex/abc/all  (43ms)
+ * Global interceptor that emits one structured JSON line per successful request.
+ * Fields are top-level so BetterStack can index and query them:
  *
- * Error responses (4xx/5xx) are handled by AllExceptionsFilter; those
- * requests still get the inbound "→" line but the outbound "←" line
- * is skipped here (no double-logging on errors).
+ *   { "message": "GET /dex/abc/all → 200", "method": "GET", "path": "/dex/abc/all",
+ *     "status_code": 200, "duration_ms": 43, "user_id": "user-123" }
+ *
+ * Error responses (4xx/5xx) are handled by AllExceptionsFilter — no double-logging.
  */
 @Injectable()
 export class HttpLoggerInterceptor implements NestInterceptor {
@@ -32,16 +32,22 @@ export class HttpLoggerInterceptor implements NestInterceptor {
     const userId = req.user?.sub ?? 'anonymous';
     const start = Date.now();
 
-    // Line 1 — inbound request
-    this.logger.log(`→ ${method} ${url}  (userId: ${userId})`, 'HttpLogger');
-
     return next.handle().pipe(
       tap(() => {
-        // Line 2 — outbound response (only on success; errors go via AllExceptionsFilter)
         const res = context.switchToHttp().getResponse<Response>();
-        const ms = Date.now() - start;
-        this.logger.log(
-          `← ${res.statusCode} ${method} ${url}  (${ms}ms)`,
+        const duration_ms = Date.now() - start;
+        const status_code = res.statusCode;
+
+        this.logger.logMeta(
+          'log',
+          `${method} ${url} → ${status_code}`,
+          {
+            method,
+            path: url,
+            status_code,
+            duration_ms,
+            user_id: userId,
+          },
           'HttpLogger',
         );
       }),
