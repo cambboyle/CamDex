@@ -7,7 +7,6 @@ import {
   useCreateTeam,
   useDeleteTeam,
 } from '@/hooks/useTeamsQuery'
-import { server } from '../mocks/server'
 import { MOCK_TEAM_ID } from '../mocks/handlers'
 
 // ── Test wrapper ──────────────────────────────────────────────────────────────
